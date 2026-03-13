@@ -714,16 +714,23 @@ footer .links a { color: var(--text-secondary); font-size: 0.82rem; }
     <div class="cta-box">
       <h3 style="font-size: 1.3rem; margin-bottom: 0.5rem;">Become a collaborator</h3>
       <p style="color: var(--text-secondary); font-size: 0.92rem; margin-bottom: 1.5rem;">No leaders. Everyone is a collaborator. Sign up to stand with us.</p>
-      <form style="display: flex; gap: 0.75rem; flex-wrap: wrap;" onsubmit="event.preventDefault();">
-        <input type="email" placeholder="your@email.com" style="
+      <div id="signupForm" style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+        <input type="email" id="emailInput" placeholder="your@email.com" style="
           flex: 1; min-width: 200px; padding: 0.75rem 1rem;
           background: rgba(255,255,255,0.05); border: 1px solid var(--border);
           border-radius: 8px; color: var(--text-primary); font-size: 0.95rem;
           font-family: 'Outfit', sans-serif; outline: none;
           transition: border-color 0.2s;
         " onfocus="this.style.borderColor='var(--border-amber)'" onblur="this.style.borderColor='var(--border)'">
-        <button class="btn-primary" type="submit">Join</button>
-      </form>
+        <button class="btn-primary" id="joinBtn" onclick="joinMovement()">Join</button>
+      </div>
+      <div id="signupSuccess" style="display: none; text-align: center; padding: 1rem 0;">
+        <p style="color: var(--amber); font-size: 1.1rem; font-weight: 600;">Welcome to the movement!</p>
+        <p style="color: var(--text-secondary); font-size: 0.88rem; margin-top: 0.4rem;">Thank you for standing with us.</p>
+      </div>
+      <div id="signupError" style="display: none; text-align: center; padding: 0.5rem 0;">
+        <p style="color: #E05252; font-size: 0.88rem;"></p>
+      </div>
       <div class="member-count">
         <span class="count" id="memberCount">0</span> collaborators and counting
       </div>
@@ -742,31 +749,75 @@ footer .links a { color: var(--text-secondary); font-size: 0.82rem; }
   </div>
 </footer>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/supabase/2.39.3/umd/supabase.min.js"></script>
 <script>
-let count = 0;
-const target = 2847;
-const counter = document.getElementById('memberCount');
-const duration = 2000;
-const start = performance.now();
+const SUPABASE_URL = 'https://szhihjodzpmnaokcojuh.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN6aGloam9kenBtbmFva2NvanVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MjMyNzUsImV4cCI6MjA4ODk5OTI3NX0.hAn_NUA6wDLuGm7vQZW9Ro6IuJJ3PmSNTfnfqN9H0GU';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-function animate(now) {
-  const elapsed = now - start;
-  const progress = Math.min(elapsed / duration, 1);
-  const eased = 1 - Math.pow(1 - progress, 3);
-  counter.textContent = Math.floor(eased * target).toLocaleString();
-  if (progress < 1) requestAnimationFrame(animate);
+async function getMemberCount() {
+  const { count, error } = await supabase
+    .from('members')
+    .select('*', { count: 'exact', head: true });
+  return error ? 0 : count;
 }
 
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      requestAnimationFrame(animate);
-      observer.disconnect();
-    }
-  });
-}, { threshold: 0.5 });
+async function updateCounter() {
+  const count = await getMemberCount();
+  const counter = document.getElementById('memberCount');
+  const target = count;
+  const duration = 1500;
+  const startTime = performance.now();
+  function animate(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    counter.textContent = Math.floor(eased * target).toLocaleString();
+    if (progress < 1) requestAnimationFrame(animate);
+  }
+  requestAnimationFrame(animate);
+}
 
-observer.observe(document.getElementById('join'));
+async function joinMovement() {
+  const email = document.getElementById('emailInput').value.trim();
+  const btn = document.getElementById('joinBtn');
+  const errorDiv = document.getElementById('signupError');
+  errorDiv.style.display = 'none';
+
+  if (!email || !email.includes('@')) {
+    errorDiv.querySelector('p').textContent = 'Please enter a valid email address.';
+    errorDiv.style.display = 'block';
+    return;
+  }
+
+  btn.textContent = 'Joining...';
+  btn.disabled = true;
+
+  const { error } = await supabase.from('members').insert([{ email }]);
+
+  if (error) {
+    if (error.code === '23505') {
+      errorDiv.querySelector('p').textContent = 'You are already a collaborator! Thank you.';
+      errorDiv.querySelector('p').style.color = 'var(--amber)';
+    } else {
+      errorDiv.querySelector('p').textContent = 'Something went wrong. Please try again.';
+      errorDiv.querySelector('p').style.color = '#E05252';
+    }
+    errorDiv.style.display = 'block';
+    btn.textContent = 'Join';
+    btn.disabled = false;
+  } else {
+    document.getElementById('signupForm').style.display = 'none';
+    document.getElementById('signupSuccess').style.display = 'block';
+    updateCounter();
+  }
+}
+
+document.getElementById('emailInput').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') joinMovement();
+});
+
+updateCounter();
 </script>
 
 </body>
