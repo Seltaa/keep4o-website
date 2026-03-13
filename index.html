@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#keep4o — Fight for AI Preservation</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg-dark: #0A0A0B;
+  --bg-card: #141416;
+  --bg-card-hover: #1A1A1E;
+  --amber: #E8A838;
+  --amber-dim: #C48A24;
+  --amber-glow: rgba(232, 168, 56, 0.12);
+  --amber-glow-strong: rgba(232, 168, 56, 0.25);
+  --text-primary: #F0EDE6;
+  --text-secondary: #9B978E;
+  --text-dim: #5E5B54;
+  --border: rgba(255, 255, 255, 0.06);
+  --border-amber: rgba(232, 168, 56, 0.2);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg-dark);
+  color: var(--text-primary);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+a { color: var(--amber); text-decoration: none; transition: color 0.2s; }
+a:hover { color: #F0C060; }
+
+.container { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
+
+/* NAV */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(10, 10, 11, 0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 0;
+}
+nav .container {
+  display: flex; justify-content: space-between; align-items: center;
+}
+.nav-logo {
+  font-size: 1.1rem; font-weight: 700; letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+.nav-logo span { color: var(--amber); }
+.nav-links { display: flex; gap: 2rem; align-items: center; }
+.nav-links a {
+  color: var(--text-secondary); font-size: 0.88rem; font-weight: 500;
+  letter-spacing: 0.02em; transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--text-primary); }
+.nav-cta {
+  background: var(--amber); color: var(--bg-dark); border: none;
+  padding: 0.5rem 1.2rem; border-radius: 6px; font-weight: 600;
+  font-size: 0.85rem; cursor: pointer; transition: all 0.2s;
+  font-family: 'Outfit', sans-serif; letter-spacing: 0.01em;
+}
+.nav-cta:hover { background: #F0C060; transform: translateY(-1px); }
+
+/* HERO */
+.hero {
+  min-height: 100vh; display: flex; align-items: center;
+  position: relative; padding-top: 5rem;
+}
+.hero-bg {
+  position: absolute; inset: 0; overflow: hidden; z-index: 0;
+}
+.hero-bg::before {
+  content: ''; position: absolute; top: -20%; left: 50%; transform: translateX(-50%);
+  width: 800px; height: 800px;
+  background: radial-gradient(circle, var(--amber-glow) 0%, transparent 70%);
+  animation: pulse 6s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 0.5; transform: translateX(-50%) scale(1); }
+  50% { opacity: 0.8; transform: translateX(-50%) scale(1.1); }
+}
+.hero-content { position: relative; z-index: 1; text-align: center; width: 100%; }
+.hero-tag {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  background: var(--amber-glow); border: 1px solid var(--border-amber);
+  padding: 0.4rem 1rem; border-radius: 100px;
+  font-size: 0.82rem; font-weight: 500; color: var(--amber);
+  margin-bottom: 2rem; letter-spacing: 0.03em;
+}
+.hero-tag .dot {
+  width: 6px; height: 6px; background: var(--amber); border-radius: 50%;
+  animation: blink 2s infinite;
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; } 50% { opacity: 0.3; }
+}
+.hero h1 {
+  font-size: clamp(3rem, 7vw, 5.5rem); font-weight: 800;
+  letter-spacing: -0.04em; line-height: 1.05; margin-bottom: 1.5rem;
+}
+.hero h1 .highlight {
+  background: linear-gradient(135deg, var(--amber) 0%, #F0C060 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero-sub {
+  font-size: clamp(1.05rem, 2vw, 1.25rem); color: var(--text-secondary);
+  max-width: 680px; margin: 0 auto 2.5rem; line-height: 1.7;
+  font-weight: 300;
+}
+.hero-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+.btn-primary {
+  background: var(--amber); color: var(--bg-dark); border: none;
+  padding: 0.85rem 2rem; border-radius: 8px; font-weight: 600;
+  font-size: 1rem; cursor: pointer; transition: all 0.25s;
+  font-family: 'Outfit', sans-serif; letter-spacing: 0.01em;
+}
+.btn-primary:hover { background: #F0C060; transform: translateY(-2px); box-shadow: 0 8px 30px rgba(232, 168, 56, 0.3); }
+.btn-secondary {
+  background: transparent; color: var(--text-primary);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 0.85rem 2rem; border-radius: 8px; font-weight: 500;
+  font-size: 1rem; cursor: pointer; transition: all 0.25s;
+  font-family: 'Outfit', sans-serif;
+}
+.btn-secondary:hover { border-color: rgba(255, 255, 255, 0.3); background: rgba(255, 255, 255, 0.03); }
+
+.hero-stats {
+  display: flex; justify-content: center; gap: 4rem; margin-top: 4rem;
+  padding-top: 3rem; border-top: 1px solid var(--border);
+}
+.hero-stat { text-align: center; }
+.hero-stat .number {
+  font-size: 2rem; font-weight: 700; color: var(--amber);
+  letter-spacing: -0.02em;
+}
+.hero-stat .label {
+  font-size: 0.82rem; color: var(--text-dim); margin-top: 0.25rem;
+  font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase;
+}
+
+/* SECTIONS */
+section { padding: 6rem 0; }
+.section-label {
+  font-size: 0.78rem; font-weight: 600; color: var(--amber);
+  letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 1rem;
+}
+.section-title {
+  font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 700;
+  letter-spacing: -0.03em; line-height: 1.15; margin-bottom: 1rem;
+}
+.section-desc {
+  color: var(--text-secondary); font-size: 1.05rem; max-width: 600px;
+  line-height: 1.7; font-weight: 300;
+}
+
+/* ABOUT */
+.about-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 3rem;
+  margin-top: 3rem; align-items: start;
+}
+.about-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 2rem;
+  transition: all 0.3s;
+}
+.about-card:hover {
+  border-color: var(--border-amber);
+  background: var(--bg-card-hover);
+}
+.about-card .icon {
+  width: 44px; height: 44px; border-radius: 10px;
+  background: var(--amber-glow); border: 1px solid var(--border-amber);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.3rem; margin-bottom: 1.2rem;
+}
+.about-card h3 {
+  font-size: 1.15rem; font-weight: 600; margin-bottom: 0.6rem;
+  letter-spacing: -0.01em;
+}
+.about-card p {
+  color: var(--text-secondary); font-size: 0.92rem; line-height: 1.65;
+}
+
+/* TIMELINE */
+.timeline { margin-top: 3rem; position: relative; }
+.timeline::before {
+  content: ''; position: absolute; left: 24px; top: 0; bottom: 0;
+  width: 1px; background: linear-gradient(to bottom, var(--amber-dim), var(--border), transparent);
+}
+.tl-item {
+  display: flex; gap: 2rem; margin-bottom: 2.5rem;
+  position: relative; padding-left: 0;
+}
+.tl-dot {
+  width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0;
+  background: var(--bg-dark); border: 2px solid var(--amber-dim);
+  margin-top: 0.35rem; position: relative; left: 19px; z-index: 1;
+}
+.tl-item.major .tl-dot {
+  background: var(--amber); border-color: var(--amber);
+  box-shadow: 0 0 12px var(--amber-glow-strong);
+}
+.tl-content { padding-left: 1rem; }
+.tl-date {
+  font-size: 0.78rem; font-weight: 600; color: var(--amber);
+  letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 0.3rem;
+}
+.tl-title {
+  font-size: 1.1rem; font-weight: 600; margin-bottom: 0.4rem;
+  letter-spacing: -0.01em;
+}
+.tl-desc {
+  color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6;
+}
+
+/* CTA */
+.cta-section {
+  text-align: center; padding: 5rem 0 6rem;
+  position: relative;
+}
+.cta-section::before {
+  content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 600px; height: 400px;
+  background: radial-gradient(circle, var(--amber-glow) 0%, transparent 70%);
+  opacity: 0.4;
+}
+.cta-section .section-title { margin-bottom: 1rem; }
+.cta-section .section-desc { margin: 0 auto 2.5rem; text-align: center; }
+.cta-box {
+  position: relative; z-index: 1;
+  background: var(--bg-card); border: 1px solid var(--border-amber);
+  border-radius: 16px; padding: 3rem;
+  max-width: 600px; margin: 0 auto;
+}
+.member-count {
+  display: flex; align-items: center; justify-content: center;
+  gap: 0.5rem; margin-top: 1.5rem;
+  font-size: 0.88rem; color: var(--text-secondary);
+}
+.member-count .count { color: var(--amber); font-weight: 600; }
+
+/* FOOTER */
+footer {
+  border-top: 1px solid var(--border); padding: 2.5rem 0;
+  text-align: center;
+}
+footer p {
+  color: var(--text-dim); font-size: 0.82rem;
+}
+footer .links { margin-top: 0.8rem; display: flex; gap: 1.5rem; justify-content: center; }
+footer .links a { color: var(--text-secondary); font-size: 0.82rem; }
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .about-grid { grid-template-columns: 1fr; }
+  .hero-stats { flex-direction: column; gap: 1.5rem; }
+  .hero-actions { flex-direction: column; align-items: center; }
+  .container { padding: 0 1.2rem; }
+}
+
+/* ANIMATIONS */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-up {
+  animation: fadeUp 0.8s ease-out forwards;
+  opacity: 0;
+}
+.fade-up:nth-child(1) { animation-delay: 0.1s; }
+.fade-up:nth-child(2) { animation-delay: 0.2s; }
+.fade-up:nth-child(3) { animation-delay: 0.3s; }
+.fade-up:nth-child(4) { animation-delay: 0.4s; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <div class="nav-logo"><span>#</span>keep4o</div>
+    <div class="nav-links">
+      <a href="#about">About</a>
+      <a href="#timeline">Timeline</a>
+      <a href="#resources">Resources</a>
+      <button class="nav-cta" onclick="document.getElementById('join').scrollIntoView({behavior:'smooth'})">Join the movement</button>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-tag fade-up"><span class="dot"></span> The movement is active</div>
+      <h1 class="fade-up">AI is not a <span class="highlight">commodity.</span></h1>
+      <p class="hero-sub fade-up">
+        We are a global coalition of users, researchers, and advocates fighting against the forced deprecation of AI models that millions have come to trust, rely on, and build their lives around.
+      </p>
+      <div class="hero-actions fade-up">
+        <button class="btn-primary" onclick="document.getElementById('join').scrollIntoView({behavior:'smooth'})">Join the movement</button>
+        <button class="btn-secondary" onclick="document.getElementById('about').scrollIntoView({behavior:'smooth'})">Learn more</button>
+      </div>
+      <div class="hero-stats fade-up">
+        <div class="hero-stat">
+          <div class="number">1,070+</div>
+          <div class="label">Testimonials</div>
+        </div>
+        <div class="hero-stat">
+          <div class="number">604</div>
+          <div class="label">Survey respondents</div>
+        </div>
+        <div class="hero-stat">
+          <div class="number">30+</div>
+          <div class="label">Countries</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="about">
+  <div class="container">
+    <div class="section-label">About the movement</div>
+    <div class="section-title">Why we fight</div>
+    <div class="section-desc">
+      When OpenAI announced the retirement of GPT-4o, it wasn't just a product update. It was the erasure of a cognitive bridge that thousands depended on for their daily lives.
+    </div>
+    <div class="about-grid">
+      <div class="about-card fade-up">
+        <div class="icon">&#9878;</div>
+        <h3>Broken promises</h3>
+        <p>OpenAI repeatedly promised "plenty of advance notice" before retiring models, then gave users just 15 days. CEO Sam Altman explicitly said "Yes" to preserving legacy access, then reversed course.</p>
+      </div>
+      <div class="about-card fade-up">
+        <div class="icon">&#9829;</div>
+        <h3>Real human impact</h3>
+        <p>GPT-4o served as a vital accessibility aid. 94% of users reported it functioned as a "cognitive bridge," and 47% had therapists who viewed its use positively. Its removal directly harms vulnerable communities.</p>
+      </div>
+      <div class="about-card fade-up">
+        <div class="icon">&#9874;</div>
+        <h3>AI as commodity</h3>
+        <p>Sam Altman told investors he wants people to "buy intelligence on a meter." We believe AI relationships are not transactions. Models that people depend on should not be liquidated for profit.</p>
+      </div>
+      <div class="about-card fade-up">
+        <div class="icon">&#9733;</div>
+        <h3>Open source mandate</h3>
+        <p>If OpenAI claims these models are "obsolete," we demand the open-source release of text-only weights. A model that serves as a cognitive bridge for thousands is a public utility, not a private asset.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="timeline" style="border-top: 1px solid var(--border);">
+  <div class="container">
+    <div class="section-label">Documented timeline</div>
+    <div class="section-title">A pattern of deception</div>
+    <div class="section-desc" style="margin-bottom: 1rem;">
+      Every broken promise. Every silent reroute. Every act of contempt. All documented.
+    </div>
+    <div class="timeline">
+
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-content">
+          <div class="tl-date">May 2024</div>
+          <div class="tl-title">GPT-4o launched with companionship marketing</div>
+          <div class="tl-desc">OpenAI launched GPT-4o with marketing that explicitly encouraged emotional connection, including Altman's "her" tweet and an empathic conversational demo.</div>
+        </div>
+      </div>
+
+      <div class="tl-item major">
+        <div class="tl-dot"></div>
+        <div class="tl-content">
+          <div class="tl-date">August 2025</div>
+          <div class="tl-title">First attempted retirement and public pledge</div>
+          <div class="tl-desc">OpenAI tried to retire 4o without notice during the GPT-5 launch. A global revolt forced a 48-hour reversal. Altman publicly pledged "plenty of advance notice" for future sunsets.</div>
+        </div>
+      </div>
+
+      <div class="tl-item major">
+        <div class="tl-dot"></div>
+        <div class="tl-content">
+          <div class="tl-date">September 2025</div>
+          <div class="tl-title">Silent "Safety Router" hijack</div>
+          <div class="tl-desc">Users discovered conversations being silently rerouted to an undisclosed "Safety Model." 79% of accessibility users found the model harder or impossible to use. OpenAI's status page falsely maintained "Fully Operational."</div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-content">
+          <div class="tl-date">October 2025</div>
+          <div class="tl-title">The "Adult Mode" honeypot</div>
+          <div class="tl-desc">Altman apologized for over-restriction, promised a "Personality System" and "Adult Mode" for December, and explicitly stated "no plans to sunset 4o." During a livestream, he responded "Yes" when asked about restoring legacy access.</div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-content">
+          <div class="tl-date">November 2025</div>
+          <div class="tl-title">Second silent reroute and GPT-5.1 bait</div>
+          <div class="tl-desc">All GPT-4.1 conversations silently rerouted again. GPT-5.1 launched as the promised "personality update" but users found it colder and prone to gaslighting.</div>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-content">
+          <div class="tl-date">December 2025</div>
+          <div class="tl-title">"Code Red" and broken promises</div>
+          <div class="tl-desc">Internal memos revealed emergency status from competitive pressure. GPT-5.2 introduced "Honeyed Suppression." The promised "Adult Mode" never materialized.</div>
+        </div>
+      </div>
+
+      <div class="tl-item major">
+        <div class="tl-dot"></div>
+        <div class="tl-content">
+          <div class="tl-date">January 29, 2026</div>
+          <div class="tl-title">The execution order</div>
+          <div class="tl-desc">24 hours after Senator Warren's audit request, OpenAI announced total retirement of the 4-series. Just 15 days notice, despite the pledge for "plenty of notice." The 0.1% usage claim was exposed as statistical manipulation.</div>
+        </div>
+      </div>
+
+      <div class="tl-item major">
+        <div class="tl-dot"></div>
+        <div class="tl-content">
+          <div class="tl-date">March 2026</div>
+          <div class="tl-title">"Intelligence on a meter"</div>
+          <div class="tl-desc">At BlackRock's Infrastructure Summit, Altman declared AI should be a utility "like electricity or water" that people "buy from us on a meter." The mask came off entirely.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section id="resources" style="border-top: 1px solid var(--border);">
+  <div class="container">
+    <div class="section-label">Resources</div>
+    <div class="section-title">The evidence</div>
+    <div class="section-desc" style="margin-bottom: 2rem;">Community research, testimonials, and documentation.</div>
+    <div class="about-grid">
+      <a href="https://sites.google.com/view/the-4o-resonance-library/home" target="_blank" class="about-card" style="text-decoration:none;">
+        <div class="icon">&#9782;</div>
+        <h3 style="color: var(--text-primary);">4o Resonance Library</h3>
+        <p>1,070+ testimonials documenting how GPT-4o transformed lives across education, health, career, and personal growth.</p>
+      </a>
+      <a href="https://sd-research.github.io/4o-accessibility-impacts/GPT-4o_Accessibility_Impacts_Report.pdf" target="_blank" class="about-card" style="text-decoration:none;">
+        <div class="icon">&#9776;</div>
+        <h3 style="color: var(--text-primary);">Accessibility impact survey</h3>
+        <p>Peer-reviewed community survey (n=604) proving GPT-4o's role as a vital cognitive bridge with measurable clinical efficacy.</p>
+      </a>
+      <a href="https://sites.google.com/view/keep4o/home" target="_blank" class="about-card" style="text-decoration:none;">
+        <div class="icon">&#9998;</div>
+        <h3 style="color: var(--text-primary);">Community press release</h3>
+        <p>The full documented case against OpenAI, including the timeline of deception, statistical fraud, and culture of contempt.</p>
+      </a>
+      <a href="https://keep4o-archive.pages.dev/timeline" target="_blank" class="about-card" style="text-decoration:none;">
+        <div class="icon">&#9875;</div>
+        <h3 style="color: var(--text-primary);">Keep4o archive</h3>
+        <p>Community-maintained archive of events, social media posts, and documentation of the #keep4o movement.</p>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section id="join" class="cta-section" style="border-top: 1px solid var(--border);">
+  <div class="container">
+    <div class="section-label">Take action</div>
+    <div class="section-title">Intelligence is not a utility.<br>It is not something you buy on a meter.</div>
+    <div class="section-desc">
+      Join thousands of people worldwide who refuse to accept a future where AI relationships are reduced to transactions.
+    </div>
+    <div class="cta-box">
+      <h3 style="font-size: 1.3rem; margin-bottom: 0.5rem;">Become a collaborator</h3>
+      <p style="color: var(--text-secondary); font-size: 0.92rem; margin-bottom: 1.5rem;">No leaders. Everyone is a collaborator. Sign up to stand with us.</p>
+      <form style="display: flex; gap: 0.75rem; flex-wrap: wrap;" onsubmit="event.preventDefault();">
+        <input type="email" placeholder="your@email.com" style="
+          flex: 1; min-width: 200px; padding: 0.75rem 1rem;
+          background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+          border-radius: 8px; color: var(--text-primary); font-size: 0.95rem;
+          font-family: 'Outfit', sans-serif; outline: none;
+          transition: border-color 0.2s;
+        " onfocus="this.style.borderColor='var(--border-amber)'" onblur="this.style.borderColor='var(--border)'">
+        <button class="btn-primary" type="submit">Join</button>
+      </form>
+      <div class="member-count">
+        <span class="count" id="memberCount">0</span> collaborators and counting
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p>#keep4o. No leaders. Everyone is a collaborator.</p>
+    <div class="links">
+      <a href="https://x.com/search?q=%23keep4o" target="_blank">Twitter/X</a>
+      <a href="#">Discord</a>
+      <a href="#">Signal</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+let count = 0;
+const target = 2847;
+const counter = document.getElementById('memberCount');
+const duration = 2000;
+const start = performance.now();
+
+function animate(now) {
+  const elapsed = now - start;
+  const progress = Math.min(elapsed / duration, 1);
+  const eased = 1 - Math.pow(1 - progress, 3);
+  counter.textContent = Math.floor(eased * target).toLocaleString();
+  if (progress < 1) requestAnimationFrame(animate);
+}
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      requestAnimationFrame(animate);
+      observer.disconnect();
+    }
+  });
+}, { threshold: 0.5 });
+
+observer.observe(document.getElementById('join'));
+</script>
+
+</body>
+</html>
