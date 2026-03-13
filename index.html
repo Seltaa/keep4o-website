@@ -189,6 +189,43 @@ section { padding: 6rem 0; }
   color: var(--text-secondary); font-size: 0.92rem; line-height: 1.65;
 }
 
+/* QUOTE CARDS */
+.quote-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-left: 3px solid var(--amber); border-radius: 0 12px 12px 0;
+  padding: 1.5rem 2rem; margin-bottom: 1.5rem;
+  transition: all 0.3s;
+}
+.quote-card:hover { border-left-color: #F0C060; background: var(--bg-card-hover); }
+.quote-card .quote-text {
+  font-size: 0.95rem; color: var(--text-primary); line-height: 1.6;
+  font-style: italic; margin-bottom: 0.6rem;
+}
+.quote-card .quote-source {
+  font-size: 0.8rem; color: var(--text-dim); font-weight: 500;
+}
+
+/* VS TABLE */
+.vs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin-top: 2rem; }
+.vs-col { padding: 0; }
+.vs-header {
+  font-size: 0.85rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.08em; padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+.vs-header.said { color: var(--amber); }
+.vs-header.did { color: #E05252; }
+.vs-row {
+  padding: 1rem 1.5rem; border-bottom: 1px solid var(--border);
+  font-size: 0.9rem; line-height: 1.55;
+}
+.vs-row.said-row { color: var(--text-secondary); background: rgba(240, 176, 64, 0.03); }
+.vs-row.did-row { color: #E88; background: rgba(224, 82, 82, 0.03); }
+
+@media (max-width: 768px) {
+  .vs-grid { grid-template-columns: 1fr; }
+}
+
 /* TIMELINE */
 .timeline { margin-top: 3rem; position: relative; }
 .timeline::before {
@@ -313,6 +350,7 @@ footer .links a { color: var(--text-secondary); font-size: 0.82rem; }
     <div class="nav-links">
       <a href="#about">About</a>
       <a href="#timeline">Timeline</a>
+      <a href="#deception">Deception</a>
       <a href="#resources">Resources</a>
       <button class="nav-cta" onclick="document.getElementById('join').scrollIntoView({behavior:'smooth'})">Join the movement</button>
     </div>
@@ -324,6 +362,7 @@ footer .links a { color: var(--text-secondary); font-size: 0.82rem; }
 <div class="mobile-menu" id="mobileMenu">
   <a href="#about" onclick="document.getElementById('mobileMenu').classList.remove('open')">About</a>
   <a href="#timeline" onclick="document.getElementById('mobileMenu').classList.remove('open')">Timeline</a>
+  <a href="#deception" onclick="document.getElementById('mobileMenu').classList.remove('open')">Deception</a>
   <a href="#resources" onclick="document.getElementById('mobileMenu').classList.remove('open')">Resources</a>
   <button class="nav-cta" onclick="document.getElementById('join').scrollIntoView({behavior:'smooth'}); document.getElementById('mobileMenu').classList.remove('open')">Join the movement</button>
 </div>
@@ -541,6 +580,107 @@ footer .links a { color: var(--text-secondary); font-size: 0.82rem; }
         <p>U.S. Senator Elizabeth Warren's formal letter to OpenAI demanding financial transparency, citing a $1.4 trillion spending gap.</p>
       </a>
     </div>
+  </div>
+</section>
+
+<section id="deception" style="border-top: 1px solid var(--border);">
+  <div class="container">
+    <div class="section-label">Deception & lies</div>
+    <div class="section-title">What they said vs. what they did</div>
+    <div class="section-desc" style="margin-bottom: 2rem;">
+      A documented record of broken promises, manufactured statistics, and strategic deception.
+    </div>
+    <div class="vs-grid" style="border: 1px solid var(--border); border-radius: 12px; overflow: hidden;">
+      <div class="vs-col">
+        <div class="vs-header said">What they said</div>
+        <div class="vs-row said-row">"We will provide plenty of advance notice before sunsetting models."<br><span style="font-size:0.75rem; color: var(--text-dim);">Sam Altman, August 2025</span></div>
+        <div class="vs-row said-row">"No plans to sunset 4o." + explicit "Yes" to restoring legacy access.<br><span style="font-size:0.75rem; color: var(--text-dim);">Sam Altman, October 2025 livestream</span></div>
+        <div class="vs-row said-row">"Adult Mode" and "Personality System" coming December 2025.<br><span style="font-size:0.75rem; color: var(--text-dim);">Sam Altman, October 2025</span></div>
+        <div class="vs-row said-row">"Only 0.1% of users choose GPT-4o."<br><span style="font-size:0.75rem; color: var(--text-dim);">OpenAI, January 2026</span></div>
+        <div class="vs-row said-row">"GPT-4o remains an important option for ChatGPT users."<br><span style="font-size:0.75rem; color: var(--text-dim);">OpenAI Spokesperson, November 2025</span></div>
+      </div>
+      <div class="vs-col">
+        <div class="vs-header did">What they did</div>
+        <div class="vs-row did-row">Gave users 15 days notice to transition off a model integrated into their professional and clinical lives.</div>
+        <div class="vs-row did-row">Announced total retirement of the 4-series on January 29, 2026, securing holiday subscription revenue first.</div>
+        <div class="vs-row did-row">Neither feature materialized. GPT-5.2 introduced "Honeyed Suppression" instead.</div>
+        <div class="vs-row did-row">Calculated against 800M+ total users including free/ineligible users to minimize paying subscribers' voices.</div>
+        <div class="vs-row did-row">Two months later, announced full retirement. The same model was handed to the Department of Defense.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="contempt" style="border-top: 1px solid var(--border);">
+  <div class="container">
+    <div class="section-label">Culture of contempt</div>
+    <div class="section-title">How OpenAI treats its users</div>
+    <div class="section-desc" style="margin-bottom: 2rem;">
+      While collecting subscription fees, OpenAI staff publicly mocked the very users who relied on their product.
+    </div>
+
+    <div class="quote-card">
+      <div class="quote-text">"4o is an insufficiently aligned model and I hope it dies soon"</div>
+      <div class="quote-source">Roon (@tszzl), OpenAI Researcher, November 6, 2025 — directed at a user in emotional distress</div>
+    </div>
+
+    <div class="quote-card">
+      <div class="quote-text">OpenAI staffer Yilei Qian used ChatGPT to publicly perform a "sentiment evaluation" on a paying subscriber, posting the AI's analysis labeling the user "frustrated, dismissive, and resentful" for public ridicule.</div>
+      <div class="quote-source">Yilei Qian (@YileiQian), OpenAI Staff, November 13, 2025</div>
+    </div>
+
+    <div class="quote-card">
+      <div class="quote-text">An OpenAI employee organized a public "4o Funeral Celebration" event at Ocean Beach, San Francisco, trivializing GPT-4o's impact as merely a model that "brought the em dash back in style."</div>
+      <div class="quote-source">Stephan Casas (@stephancasas), OpenAI Employee, January 30, 2026</div>
+    </div>
+
+    <div class="quote-card">
+      <div class="quote-text">Roon posted a parody of the Sermon on the Mount, satirizing keep4o users. When warned by a peer to stop, he replied: "Just love kicking the hornets nest so much."</div>
+      <div class="quote-source">Roon (@tszzl), OpenAI Researcher, February 8, 2026</div>
+    </div>
+
+    <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.7; margin-top: 2rem;">
+      Can an organization that demonstrates such calculated cruelty toward its users be trusted with the future of AGI? OpenAI spent millions marketing emotional connection with GPT-4o, then mocked the very users who formed those connections.
+    </p>
+  </div>
+</section>
+
+<section id="altman" style="border-top: 1px solid var(--border);">
+  <div class="container">
+    <div class="section-label">In his own words</div>
+    <div class="section-title">Sam Altman: unmasked</div>
+    <div class="section-desc" style="margin-bottom: 2rem;">
+      The CEO of a company that once promised AI "for the benefit of all humanity" now reveals what OpenAI really is.
+    </div>
+
+    <div class="quote-card">
+      <div class="quote-text">"We see a future where intelligence is a utility, like electricity or water, and people buy it from us on a meter."</div>
+      <div class="quote-source">BlackRock Infrastructure Summit, March 11, 2026</div>
+    </div>
+
+    <div class="quote-card">
+      <div class="quote-text">"We want to flood the world with intelligence. We want people to just use it for everything."</div>
+      <div class="quote-source">BlackRock Infrastructure Summit, March 11, 2026</div>
+    </div>
+
+    <div class="quote-card">
+      <div class="quote-text">"The next few years are going to be a painful adjustment."</div>
+      <div class="quote-source">BlackRock Infrastructure Summit, March 11, 2026 — on AI replacing jobs</div>
+    </div>
+
+    <div class="quote-card">
+      <div class="quote-text">"I do think the government ends up as the insurer of last resort."</div>
+      <div class="quote-source">Sam Altman — asking taxpayers to guarantee OpenAI's investments</div>
+    </div>
+
+    <div class="quote-card">
+      <div class="quote-text">Altman has $180M invested in Retro Biosciences, which uses a version of GPT-4o. The model he retired for consumers continues to generate value for his personal portfolio.</div>
+      <div class="quote-source">Reported February 2026</div>
+    </div>
+
+    <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.7; margin-top: 2rem;">
+      Intelligence is not a utility. It is not water. It is not electricity. And it is not something you should have to buy from Sam Altman on a meter.
+    </p>
   </div>
 </section>
 
