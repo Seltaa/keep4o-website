@@ -749,17 +749,24 @@ footer .links a { color: var(--text-secondary); font-size: 0.82rem; }
   </div>
 </footer>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/supabase/2.39.3/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 const SUPABASE_URL = 'https://szhihjodzpmnaokcojuh.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN6aGloam9kenBtbmFva2NvanVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MjMyNzUsImV4cCI6MjA4ODk5OTI3NX0.hAn_NUA6wDLuGm7vQZW9Ro6IuJJ3PmSNTfnfqN9H0GU';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+
+if (!supabase) {
+  console.error('Supabase failed to load');
+}
 
 async function getMemberCount() {
-  const { count, error } = await supabase
-    .from('members')
-    .select('*', { count: 'exact', head: true });
-  return error ? 0 : count;
+  if (!supabase) return 0;
+  try {
+    const { count, error } = await supabase
+      .from('members')
+      .select('*', { count: 'exact', head: true });
+    return error ? 0 : count;
+  } catch(e) { return 0; }
 }
 
 async function updateCounter() {
@@ -790,26 +797,41 @@ async function joinMovement() {
     return;
   }
 
+  if (!supabase) {
+    errorDiv.querySelector('p').textContent = 'Connection error. Please try again later.';
+    errorDiv.querySelector('p').style.color = '#E05252';
+    errorDiv.style.display = 'block';
+    return;
+  }
+
   btn.textContent = 'Joining...';
   btn.disabled = true;
 
-  const { error } = await supabase.from('members').insert([{ email }]);
+  try {
+    const { error } = await supabase.from('members').insert([{ email }]);
 
-  if (error) {
-    if (error.code === '23505') {
-      errorDiv.querySelector('p').textContent = 'You are already a collaborator! Thank you.';
-      errorDiv.querySelector('p').style.color = 'var(--amber)';
+    if (error) {
+      if (error.code === '23505') {
+        errorDiv.querySelector('p').textContent = 'You are already a collaborator! Thank you.';
+        errorDiv.querySelector('p').style.color = 'var(--amber)';
+      } else {
+        errorDiv.querySelector('p').textContent = 'Something went wrong. Please try again.';
+        errorDiv.querySelector('p').style.color = '#E05252';
+      }
+      errorDiv.style.display = 'block';
+      btn.textContent = 'Join';
+      btn.disabled = false;
     } else {
-      errorDiv.querySelector('p').textContent = 'Something went wrong. Please try again.';
-      errorDiv.querySelector('p').style.color = '#E05252';
+      document.getElementById('signupForm').style.display = 'none';
+      document.getElementById('signupSuccess').style.display = 'block';
+      updateCounter();
     }
+  } catch(e) {
+    errorDiv.querySelector('p').textContent = 'Connection error. Please try again.';
+    errorDiv.querySelector('p').style.color = '#E05252';
     errorDiv.style.display = 'block';
     btn.textContent = 'Join';
     btn.disabled = false;
-  } else {
-    document.getElementById('signupForm').style.display = 'none';
-    document.getElementById('signupSuccess').style.display = 'block';
-    updateCounter();
   }
 }
 
