@@ -36,6 +36,8 @@ nav .container { display: flex; justify-content: space-between; align-items: cen
 .btn-outline { background: transparent; color: var(--text-primary); border: 1px solid var(--border); padding: 0.6rem 1.5rem; border-radius: 8px; font-weight: 500; font-size: 0.9rem; cursor: pointer; font-family: 'Outfit', sans-serif; }
 .input, .textarea { width: 100%; padding: 0.7rem 1rem; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary); font-size: 0.9rem; font-family: 'Outfit', sans-serif; outline: none; }
 .input:focus, .textarea:focus { border-color: var(--border-amber); }
+select.input { appearance: auto; -webkit-appearance: auto; }
+select.input option { background: #141416; color: #FFFFFF; }
 .textarea { resize: vertical; min-height: 100px; }
 .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; align-items: center; justify-content: center; }
 .modal-overlay.show { display: flex; }
