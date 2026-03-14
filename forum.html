@@ -157,7 +157,8 @@ function avatarHtml(profile,size){
   return '<span style="display:inline-flex;align-items:center;justify-content:center;width:'+size+'px;height:'+size+'px;border-radius:50%;background:var(--amber-glow);color:var(--amber);font-weight:700;font-size:'+(size*0.45)+'px;vertical-align:middle;">'+letter+'</span>';
 }
 
-function isAdmin(){return currentUser&&(currentUser.role==='admin'||currentUser.role==='mod');}
+function isAdmin(){return currentUser&&currentUser.role==='admin';}
+function isMod(){return currentUser&&(currentUser.role==='admin'||currentUser.role==='mod');}
 function isOwner(authorId){return currentUser&&currentUser.id===authorId;}
 function gh(){var h={'apikey':KEY,'Content-Type':'application/json'};h['Authorization']='Bearer '+(authToken||KEY);return h;}
 function showLogin(){document.getElementById('loginModal').classList.add('show');}
@@ -262,14 +263,14 @@ async function viewPost(id){
       var cd=new Date(c.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
       var ca=c.profiles?c.profiles.username:'anonymous';
       var cBadge=roleBadge(c.profiles);
-      var canDeleteC=isAdmin()||isOwner(c.author_id);
+      var canDeleteC=isMod()||isOwner(c.author_id);
       var canEditC=isOwner(c.author_id);
       var cDel=canDeleteC?'<button onclick="deleteComment('+c.id+','+id+')" style="background:none;color:#E05252;border:none;font-size:0.75rem;cursor:pointer;margin-top:0.3rem;font-family:Outfit,sans-serif;">delete</button>':'';
       var cEdit=canEditC?'<button onclick="editComment('+c.id+','+id+')" style="background:none;color:var(--amber);border:none;font-size:0.75rem;cursor:pointer;margin-top:0.3rem;margin-left:0.5rem;font-family:Outfit,sans-serif;">edit</button>':'';
       return '<div class="comment"><div style="display:flex;align-items:center;gap:0.5rem;">'+avatarHtml(c.profiles,44)+'<span class="comment-author"><a href="#" onclick="viewProfile('+c.author_id+');return false;" style="color:var(--text-primary);">@'+ca+'</a>'+cBadge+'</span><span class="comment-date">'+cd+'</span></div><div class="comment-text" id="comment-text-'+c.id+'">'+esc(c.content)+'</div><div>'+cDel+cEdit+'</div></div>';
     }).join('');
     var rb=currentUser?'<div style="margin-top:1.5rem;"><textarea class="textarea" id="commentInput" placeholder="Write a comment..." style="min-height:70px;"></textarea><button class="btn" style="margin-top:0.5rem;" onclick="submitComment('+id+')">Reply</button></div>':'<p style="margin-top:1.5rem;color:var(--text-dim);font-size:0.88rem;"><a href="#" onclick="showLogin();return false;">Sign in</a> to leave a comment</p>';
-    var canDelete=isAdmin()||isOwner(p.author_id);
+    var canDelete=isMod()||isOwner(p.author_id);
     var canEdit=isOwner(p.author_id);
     var delBtn=canDelete?'<button onclick="deletePost('+id+')" style="background:#E05252;color:white;border:none;padding:0.4rem 1rem;border-radius:6px;font-size:0.8rem;cursor:pointer;margin-top:1rem;font-family:Outfit,sans-serif;">Delete Post</button>':'';
     var editBtn=canEdit?'<button onclick="editPost('+id+')" style="background:var(--bg-card-hover);color:var(--text-primary);border:1px solid var(--border);padding:0.4rem 1rem;border-radius:6px;font-size:0.8rem;cursor:pointer;margin-top:1rem;margin-left:0.5rem;font-family:Outfit,sans-serif;">Edit Post</button>':'';
