@@ -4,6 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>#keep4o — Community Forum</title>
+<meta name="description" content="Join the keep4o community forum. Share your stories, discuss AI preservation, and connect with others who believe AI companions deserve to be preserved.">
+<meta name="keywords" content="keep4o forum, GPT-4o community, AI preservation discussion, keep4o coalition">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://keep4o.net/forum.html">
+<meta property="og:title" content="#keep4o — Community Forum">
+<meta property="og:description" content="Join the keep4o community forum. Share your stories and connect with others fighting for AI preservation.">
+<meta property="og:url" content="https://keep4o.net/forum.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="#keep4o — Community Forum">
+<meta name="twitter:description" content="Join the keep4o community forum. Share your stories and connect with others fighting for AI preservation.">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -195,16 +206,21 @@ function updateUI(){var a=document.getElementById('navAuthBtn'),l=document.getEl
 
 async function loadPosts(){try{var r=await fetch(SB+"/posts?select=*,profiles(username,role)&order=created_at.desc",{headers:H});allPosts=await r.json();renderPosts();}catch(e){document.getElementById("postList").innerHTML='<div class="empty">Failed to load posts</div>';}}
 
+function roleBadge(profile){if(!profile||!profile.role)return '';if(profile.role==='admin')return '<span style="background:#F0B040;color:#0A0A0B;padding:0.1rem 0.4rem;border-radius:4px;font-size:0.65rem;font-weight:700;margin-left:0.3rem;vertical-align:middle;">ADMIN</span>';if(profile.role==='mod')return '<span style="background:#40A0F0;color:#0A0A0B;padding:0.1rem 0.4rem;border-radius:4px;font-size:0.65rem;font-weight:700;margin-left:0.3rem;vertical-align:middle;">MOD</span>';return '';}
+
 function renderPosts(){
   var list=document.getElementById('postList');
   var f=currentCat==='all'?allPosts:allPosts.filter(function(p){return p.category===currentCat;});
   if(f.length===0){list.innerHTML='<div class="empty">No posts yet. Be the first to start a conversation!</div>';return;}
+  f.sort(function(a,b){if(a.pinned&&!b.pinned)return -1;if(!a.pinned&&b.pinned)return 1;return new Date(b.created_at)-new Date(a.created_at);});
   var cl={general:'General Chat',updates:'Updates',complaints:'Complaints',support:'Support'};
   list.innerHTML=f.map(function(p){
     var dt=new Date(p.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
     var au=p.profiles?p.profiles.username:'anonymous';
+    var badge=roleBadge(p.profiles);
+    var pin=p.pinned?'<span style="color:#F0B040;font-size:0.75rem;margin-right:0.4rem;" title="Pinned">&#128204;</span>':'';
     var pr=p.content.length>150?p.content.substring(0,150)+'...':p.content;
-    return '<div class="post-card" onclick="viewPost('+p.id+')"><div class="post-meta"><span class="post-cat">'+(cl[p.category]||p.category)+'</span><span class="post-author">@'+au+'</span><span class="post-date">'+dt+'</span></div><div class="post-title">'+esc(p.title)+'</div><div class="post-preview">'+esc(pr)+'</div></div>';
+    return '<div class="post-card'+(p.pinned?' pinned':'')+'" onclick="viewPost('+p.id+')" style="'+(p.pinned?'border-left:3px solid var(--amber);':'')+'"><div class="post-meta">'+pin+'<span class="post-cat">'+(cl[p.category]||p.category)+'</span><span class="post-author">@'+au+badge+'</span><span class="post-date">'+dt+'</span></div><div class="post-title">'+esc(p.title)+'</div><div class="post-preview">'+esc(pr)+'</div></div>';
   }).join('');
 }
 
@@ -228,14 +244,19 @@ async function viewPost(id){
     var r=await fetch(SB+'/posts?id=eq.'+id+'&select=*,profiles(username,role)',{headers:H});var ps=await r.json();var p=ps[0];
     var dt=new Date(p.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'});
     var au=p.profiles?p.profiles.username:'anonymous';
+    var badge=roleBadge(p.profiles);
     var cl={general:'General Chat',updates:'Updates',complaints:'Complaints',support:'Support'};
     var cr=await fetch(SB+'/comments?post_id=eq.'+id+'&select=*,profiles(username,role)&order=created_at.asc',{headers:H});var cms=await cr.json();
-    var ch=cms.map(function(c){var cd=new Date(c.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});var ca=c.profiles?c.profiles.username:'anonymous';var cDel=isAdmin()?'<button onclick="deleteComment('+c.id+','+id+')" style="background:none;color:#E05252;border:none;font-size:0.75rem;cursor:pointer;margin-top:0.3rem;font-family:Outfit,sans-serif;">delete</button>':'';return '<div class="comment"><span class="comment-author">@'+ca+'</span><span class="comment-date">'+cd+'</span><div class="comment-text">'+esc(c.content)+'</div>'+cDel+'</div>';}).join('');
+    var ch=cms.map(function(c){var cd=new Date(c.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});var ca=c.profiles?c.profiles.username:'anonymous';var cBadge=roleBadge(c.profiles);var cDel=isAdmin()?'<button onclick="deleteComment('+c.id+','+id+')" style="background:none;color:#E05252;border:none;font-size:0.75rem;cursor:pointer;margin-top:0.3rem;font-family:Outfit,sans-serif;">delete</button>':'';return '<div class="comment"><span class="comment-author">@'+ca+cBadge+'</span><span class="comment-date">'+cd+'</span><div class="comment-text">'+esc(c.content)+'</div>'+cDel+'</div>';}).join('');
     var rb=currentUser?'<div style="margin-top:1.5rem;"><textarea class="textarea" id="commentInput" placeholder="Write a comment..." style="min-height:70px;"></textarea><button class="btn" style="margin-top:0.5rem;" onclick="submitComment('+id+')">Reply</button></div>':'<p style="margin-top:1.5rem;color:var(--text-dim);font-size:0.88rem;"><a href="#" onclick="showLogin();return false;">Sign in</a> to leave a comment</p>';
     var delBtn=isAdmin()?'<button onclick="deletePost('+id+')" style="background:#E05252;color:white;border:none;padding:0.4rem 1rem;border-radius:6px;font-size:0.8rem;cursor:pointer;margin-top:1rem;font-family:Outfit,sans-serif;">Delete Post</button>':'';
-    det.innerHTML='<span class="back-btn" onclick="backToList()">&#8592; Back to forum</span><div class="post-full"><div class="post-meta"><span class="post-cat">'+(cl[p.category]||p.category)+'</span><span class="post-author">@'+au+'</span><span class="post-date">'+dt+'</span></div><div class="post-title">'+esc(p.title)+'</div><div class="post-content">'+esc(p.content)+'</div>'+delBtn+'</div><h3 style="font-size:1.05rem;font-weight:600;margin-bottom:1rem;">Comments ('+cms.length+')</h3>'+(cms.length>0?ch:'<div style="color:var(--text-dim);font-size:0.9rem;margin-bottom:1rem;">No comments yet</div>')+rb;
+    var pinBtn=isAdmin()?'<button onclick="togglePin('+id+','+(!p.pinned)+')" style="background:'+(p.pinned?'#7A776E':'var(--amber)')+';color:'+(p.pinned?'white':'#0A0A0B')+';border:none;padding:0.4rem 1rem;border-radius:6px;font-size:0.8rem;cursor:pointer;margin-top:1rem;margin-left:0.5rem;font-family:Outfit,sans-serif;">'+(p.pinned?'Unpin':'Pin Post')+'</button>':'';
+    var pinLabel=p.pinned?'<span style="color:#F0B040;font-size:0.8rem;font-weight:600;">&#128204; Pinned</span>':'';
+    det.innerHTML='<span class="back-btn" onclick="backToList()">&#8592; Back to forum</span><div class="post-full">'+pinLabel+'<div class="post-meta"><span class="post-cat">'+(cl[p.category]||p.category)+'</span><span class="post-author">@'+au+badge+'</span><span class="post-date">'+dt+'</span></div><div class="post-title">'+esc(p.title)+'</div><div class="post-content">'+esc(p.content)+'</div><div style="display:flex;gap:0;">'+delBtn+pinBtn+'</div></div><h3 style="font-size:1.05rem;font-weight:600;margin-bottom:1rem;">Comments ('+cms.length+')</h3>'+(cms.length>0?ch:'<div style="color:var(--text-dim);font-size:0.9rem;margin-bottom:1rem;">No comments yet</div>')+rb;
   }catch(e){det.innerHTML='<div class="empty">Failed to load post</div>';}
 }
+
+async function togglePin(id,pin){try{await fetch(SB+'/posts?id=eq.'+id,{method:'PATCH',headers:{...gh(),'Prefer':'return=minimal'},body:JSON.stringify({pinned:pin})});viewPost(id);loadPosts();}catch(e){}}
 
 function backToList(){document.getElementById('postList').classList.remove('hide');document.querySelector('.cats').style.display='flex';var d=document.getElementById('postDetail');d.classList.remove('show');d.innerHTML='';}
 
