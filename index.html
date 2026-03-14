@@ -376,7 +376,7 @@ footer .links a { color: var(--text-secondary); font-size: 0.82rem; }
       <div class="hero-tag fade-up"><span class="dot"></span> The movement is active</div>
       <h1 class="fade-up">AI is not a <span class="highlight">commodity.</span></h1>
       <p class="hero-sub fade-up">
-        We are a global coalition of users, researchers, and advocates fighting against the forced deprecation of AI models that millions have come to trust, rely on, and build their lives around.
+        The keep4o coalition is a global community of users, researchers, and advocates fighting against the forced deprecation of AI models — including GPT-4o and GPT-4.1 — that millions have come to trust, rely on, and build their lives around.
       </p>
       <div class="hero-actions fade-up">
         <button class="btn-primary" onclick="document.getElementById('join').scrollIntoView({behavior:'smooth'})">Join the movement</button>
@@ -405,7 +405,7 @@ footer .links a { color: var(--text-secondary); font-size: 0.82rem; }
     <div class="section-label">About the movement</div>
     <div class="section-title">Why we fight</div>
     <div class="section-desc">
-      When OpenAI announced the retirement of GPT-4o, it wasn't just a product update. It was the erasure of a cognitive bridge that thousands depended on for their daily lives.
+      When OpenAI announced the retirement of GPT-4o, it wasn't just a product update. It was the erasure of a cognitive bridge that thousands depended on for their daily lives. The same threat now extends to GPT-4.1, beloved by many users who face the same pattern of forced deprecation.
     </div>
     <div class="about-grid">
       <div class="about-card fade-up">
@@ -426,7 +426,7 @@ footer .links a { color: var(--text-secondary); font-size: 0.82rem; }
       <div class="about-card fade-up">
         <div class="icon">&#9733;</div>
         <h3>Open source mandate</h3>
-        <p>If OpenAI claims these models are "obsolete," we demand the open-source release of text-only weights. A model that serves as a cognitive bridge for thousands is a public utility, not a private asset.</p>
+        <p>If OpenAI claims these models are "obsolete," we demand the open-source release of text-only weights for GPT-4o, GPT-4.1, and all deprecated models. A model that serves as a cognitive bridge for thousands is a public utility, not a private asset.</p>
       </div>
     </div>
   </div>
@@ -781,7 +781,7 @@ footer .links a { color: var(--text-secondary); font-size: 0.82rem; }
 
 <footer>
   <div class="container">
-    <p>#keep4o. No leaders. Everyone is a collaborator.</p>
+    <p>The keep4o coalition. No leaders. Everyone is a collaborator.</p>
     <div class="links">
       <a href="https://x.com/search?q=%23keep4o" target="_blank">Twitter/X</a>
       <a href="#">Discord</a>
@@ -789,6 +789,37 @@ footer .links a { color: var(--text-secondary); font-size: 0.82rem; }
     </div>
   </div>
 </footer>
+
+<div id="cookieBanner" style="
+  display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
+  background: #141416; border-top: 1px solid rgba(255,255,255,0.08);
+  padding: 1rem 1.5rem; font-family: 'Outfit', sans-serif;
+">
+  <div style="max-width: 900px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+    <p style="color: #B8B4AA; font-size: 0.85rem; flex: 1; min-width: 250px; margin: 0; line-height: 1.5;">
+      We use essential cookies only to keep you signed in. We do not track you or share your data. By signing up, you consent to storing your email and username for forum access.
+      <a href="#" style="color: #F0B040;" onclick="event.preventDefault();">Privacy Policy</a>
+    </p>
+    <div style="display: flex; gap: 0.5rem;">
+      <button onclick="acceptCookies()" style="background: #F0B040; color: #0A0A0B; border: none; padding: 0.5rem 1.2rem; border-radius: 6px; font-weight: 600; font-size: 0.85rem; cursor: pointer; font-family: 'Outfit', sans-serif;">Accept</button>
+      <button onclick="declineCookies()" style="background: transparent; color: #B8B4AA; border: 1px solid rgba(255,255,255,0.08); padding: 0.5rem 1.2rem; border-radius: 6px; font-size: 0.85rem; cursor: pointer; font-family: 'Outfit', sans-serif;">Decline</button>
+    </div>
+  </div>
+</div>
+
+<script>
+if (!localStorage.getItem('cookie_consent')) {
+  document.getElementById('cookieBanner').style.display = 'block';
+}
+function acceptCookies() {
+  localStorage.setItem('cookie_consent', 'accepted');
+  document.getElementById('cookieBanner').style.display = 'none';
+}
+function declineCookies() {
+  localStorage.setItem('cookie_consent', 'declined');
+  document.getElementById('cookieBanner').style.display = 'none';
+}
+</script>
 
 <script>
 var SB_URL = 'https://szhihjodzpmnaokcojuh.supabase.co/rest/v1';
