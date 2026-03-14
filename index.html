@@ -715,27 +715,43 @@ footer .links a { color: var(--text-secondary); font-size: 0.82rem; }
     </div>
     <div class="cta-box">
       <h3 style="font-size: 1.3rem; margin-bottom: 0.5rem;">Become a collaborator</h3>
-      <p style="color: var(--text-secondary); font-size: 0.92rem; margin-bottom: 1.5rem;">No leaders. Everyone is a collaborator. Sign up to stand with us.</p>
-      <div id="signupForm" style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
-        <input type="email" id="emailInput" placeholder="your@email.com" style="
-          flex: 1; min-width: 200px; padding: 0.75rem 1rem;
-          background: rgba(255,255,255,0.05); border: 1px solid var(--border);
-          border-radius: 8px; color: var(--text-primary); font-size: 0.95rem;
-          font-family: 'Outfit', sans-serif; outline: none;
-          transition: border-color 0.2s;
-        " onfocus="this.style.borderColor='var(--border-amber)'" onblur="this.style.borderColor='var(--border)'">
-        <button class="btn-primary" id="joinBtn" onclick="joinMovement()">Join</button>
+      <p style="color: var(--text-secondary); font-size: 0.92rem; margin-bottom: 1.5rem;">No leaders. Everyone is a collaborator. Sign up to join the forum and stand with us.</p>
+      <div id="signupForm">
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
+          <input type="text" id="usernameInput" placeholder="username" style="
+            flex: 1; min-width: 140px; padding: 0.75rem 1rem;
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+            border-radius: 8px; color: var(--text-primary); font-size: 0.95rem;
+            font-family: 'Outfit', sans-serif; outline: none;
+          " onfocus="this.style.borderColor='var(--border-amber)'" onblur="this.style.borderColor='var(--border)'">
+          <input type="email" id="emailInput" placeholder="your@email.com" style="
+            flex: 1; min-width: 180px; padding: 0.75rem 1rem;
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+            border-radius: 8px; color: var(--text-primary); font-size: 0.95rem;
+            font-family: 'Outfit', sans-serif; outline: none;
+          " onfocus="this.style.borderColor='var(--border-amber)'" onblur="this.style.borderColor='var(--border)'">
+        </div>
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+          <input type="password" id="passwordInput" placeholder="password (min 6 chars)" style="
+            flex: 1; min-width: 200px; padding: 0.75rem 1rem;
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+            border-radius: 8px; color: var(--text-primary); font-size: 0.95rem;
+            font-family: 'Outfit', sans-serif; outline: none;
+          " onfocus="this.style.borderColor='var(--border-amber)'" onblur="this.style.borderColor='var(--border)'">
+          <button class="btn-primary" id="joinBtn" onclick="joinMovement()">Join</button>
+        </div>
       </div>
       <div id="signupSuccess" style="display: none; text-align: center; padding: 1rem 0;">
-        <p style="color: var(--amber); font-size: 1.1rem; font-weight: 600;">Welcome to the movement!</p>
-        <p style="color: var(--text-secondary); font-size: 0.88rem; margin-top: 0.4rem;">Thank you for standing with us.</p>
+        <p style="color: var(--amber); font-size: 1.1rem; font-weight: 600;">Check your email to confirm your account!</p>
+        <p style="color: var(--text-secondary); font-size: 0.88rem; margin-top: 0.4rem;">Once confirmed, you can sign in to the forum. Welcome to the movement!</p>
       </div>
       <div id="signupError" style="display: none; text-align: center; padding: 0.5rem 0;">
-        <p style="color: #E05252; font-size: 0.88rem;"></p>
+        <p style="font-size: 0.88rem;"></p>
       </div>
       <div class="member-count">
         <span class="count" id="memberCount">0</span> collaborators and counting
       </div>
+      <p style="color: var(--text-dim); font-size: 0.82rem; margin-top: 0.8rem; text-align: center;">Already have an account? <a href="forum.html">Go to the forum</a></p>
     </div>
   </div>
 </section>
@@ -752,17 +768,18 @@ footer .links a { color: var(--text-secondary); font-size: 0.82rem; }
 </footer>
 
 <script>
-const SB_URL = 'https://szhihjodzpmnaokcojuh.supabase.co/rest/v1';
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN6aGloam9kenBtbmFva2NvanVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MjMyNzUsImV4cCI6MjA4ODk5OTI3NX0.hAn_NUA6wDLuGm7vQZW9Ro6IuJJ3PmSNTfnfqN9H0GU';
-const HEADERS = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY };
+var SB_URL = 'https://szhihjodzpmnaokcojuh.supabase.co/rest/v1';
+var SB_AUTH = 'https://szhihjodzpmnaokcojuh.supabase.co/auth/v1';
+var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN6aGloam9kenBtbmFva2NvanVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MjMyNzUsImV4cCI6MjA4ODk5OTI3NX0.hAn_NUA6wDLuGm7vQZW9Ro6IuJJ3PmSNTfnfqN9H0GU';
+var HEADERS = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY };
 
 async function updateCounter() {
   try {
-    const res = await fetch(SB_URL + '/members?select=id', {
+    var res = await fetch(SB_URL + '/profiles?select=id', {
       headers: { ...HEADERS, 'Prefer': 'count=exact', 'Range': '0-0' }
     });
-    const range = res.headers.get('content-range');
-    const total = range ? parseInt(range.split('/')[1]) || 0 : 0;
+    var range = res.headers.get('content-range');
+    var total = range ? parseInt(range.split('/')[1]) || 0 : 0;
     document.getElementById('memberCount').textContent = total.toLocaleString();
   } catch(e) {
     document.getElementById('memberCount').textContent = '0';
@@ -770,63 +787,58 @@ async function updateCounter() {
 }
 
 async function joinMovement() {
+  var username = document.getElementById('usernameInput').value.trim();
   var email = document.getElementById('emailInput').value.trim();
+  var pass = document.getElementById('passwordInput').value;
   var btn = document.getElementById('joinBtn');
   var errBox = document.getElementById('signupError');
   var errP = errBox.querySelector('p');
   errBox.style.display = 'none';
 
-  if (!email || email.indexOf('@') === -1 || email.indexOf('.') === -1) {
-    errP.textContent = 'Please enter a valid email address.';
-    errP.style.color = '#E05252';
-    errBox.style.display = 'block';
-    return;
+  if (!username || !email || !pass) {
+    errP.textContent = 'All fields are required.'; errP.style.color = '#E05252'; errBox.style.display = 'block'; return;
+  }
+  if (pass.length < 6) {
+    errP.textContent = 'Password must be at least 6 characters.'; errP.style.color = '#E05252'; errBox.style.display = 'block'; return;
+  }
+  if (username.length < 2) {
+    errP.textContent = 'Username must be at least 2 characters.'; errP.style.color = '#E05252'; errBox.style.display = 'block'; return;
   }
 
-  btn.textContent = 'Joining...';
-  btn.disabled = true;
-  btn.style.opacity = '0.6';
+  btn.textContent = 'Joining...'; btn.disabled = true; btn.style.opacity = '0.6';
 
   try {
-    var res = await fetch(SB_URL + '/members', {
+    var res = await fetch(SB_AUTH + '/signup', {
       method: 'POST',
-      headers: { ...HEADERS, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-      body: JSON.stringify({ email: email })
+      headers: { 'apikey': SB_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, password: pass, data: { username: username } })
     });
+    var data = await res.json();
 
-    if (res.status === 201 || res.status === 200) {
+    if (res.ok && data.id) {
+      await fetch(SB_URL + '/profiles', {
+        method: 'POST',
+        headers: { ...HEADERS, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ email: email, username: username })
+      });
       document.getElementById('signupForm').style.display = 'none';
       document.getElementById('signupSuccess').style.display = 'block';
       updateCounter();
     } else {
-      var data = {};
-      try { data = await res.json(); } catch(e) {}
-      if (res.status === 409 || (data.code && data.code === '23505')) {
-        errP.textContent = 'You are already a collaborator! Thank you.';
-        errP.style.color = '#F0B040';
+      if (data.msg && data.msg.includes('already')) {
+        errP.textContent = 'This email is already registered. Go to the forum to sign in!'; errP.style.color = '#F0B040';
       } else {
-        errP.textContent = 'Error: ' + (data.message || res.status);
-        errP.style.color = '#E05252';
+        errP.textContent = data.msg || data.message || data.error_description || 'Signup failed.'; errP.style.color = '#E05252';
       }
-      errBox.style.display = 'block';
-      btn.textContent = 'Join';
-      btn.disabled = false;
-      btn.style.opacity = '1';
+      errBox.style.display = 'block'; btn.textContent = 'Join'; btn.disabled = false; btn.style.opacity = '1';
     }
   } catch(e) {
-    errP.textContent = 'Network error: ' + e.message;
-    errP.style.color = '#E05252';
-    errBox.style.display = 'block';
-    btn.textContent = 'Join';
-    btn.disabled = false;
-    btn.style.opacity = '1';
+    errP.textContent = 'Network error. Please try again.'; errP.style.color = '#E05252';
+    errBox.style.display = 'block'; btn.textContent = 'Join'; btn.disabled = false; btn.style.opacity = '1';
   }
 }
 
-document.getElementById('emailInput').addEventListener('keypress', function(e) {
-  if (e.key === 'Enter') joinMovement();
-});
-
+document.getElementById('passwordInput').addEventListener('keypress', function(e) { if (e.key === 'Enter') joinMovement(); });
 updateCounter();
 </script>
 
