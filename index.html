@@ -715,7 +715,7 @@ footer .links a { color: var(--text-secondary); font-size: 0.82rem; }
     </div>
     <div class="cta-box">
       <h3 style="font-size: 1.3rem; margin-bottom: 0.5rem;">Become a collaborator</h3>
-      <p style="color: var(--text-secondary); font-size: 0.92rem; margin-bottom: 1.5rem;">No leaders. Everyone is a collaborator. Sign up to join the forum and stand with us.</p>
+      <p id="authDesc" style="color: var(--text-secondary); font-size: 0.92rem; margin-bottom: 1.5rem;">No leaders. Everyone is a collaborator. Sign up to join the forum and stand with us.</p>
       <div id="signupForm">
         <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
           <input type="text" id="usernameInput" placeholder="username" style="
@@ -741,9 +741,32 @@ footer .links a { color: var(--text-secondary); font-size: 0.82rem; }
           <button class="btn-primary" id="joinBtn" onclick="joinMovement()">Join</button>
         </div>
       </div>
+      <div id="loginForm" style="display: none;">
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
+          <input type="email" id="loginEmail" placeholder="your@email.com" style="
+            flex: 1; min-width: 200px; padding: 0.75rem 1rem;
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+            border-radius: 8px; color: var(--text-primary); font-size: 0.95rem;
+            font-family: 'Outfit', sans-serif; outline: none;
+          " onfocus="this.style.borderColor='var(--border-amber)'" onblur="this.style.borderColor='var(--border)'">
+        </div>
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+          <input type="password" id="loginPass" placeholder="password" style="
+            flex: 1; min-width: 200px; padding: 0.75rem 1rem;
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+            border-radius: 8px; color: var(--text-primary); font-size: 0.95rem;
+            font-family: 'Outfit', sans-serif; outline: none;
+          " onfocus="this.style.borderColor='var(--border-amber)'" onblur="this.style.borderColor='var(--border)'">
+          <button class="btn-primary" id="loginBtn" onclick="doMainLogin()">Sign in</button>
+        </div>
+      </div>
       <div id="signupSuccess" style="display: none; text-align: center; padding: 1rem 0;">
         <p style="color: var(--amber); font-size: 1.1rem; font-weight: 600;">Check your email to confirm your account!</p>
         <p style="color: var(--text-secondary); font-size: 0.88rem; margin-top: 0.4rem;">Once confirmed, you can sign in to the forum. Welcome to the movement!</p>
+      </div>
+      <div id="loginSuccess" style="display: none; text-align: center; padding: 1rem 0;">
+        <p style="color: var(--amber); font-size: 1.1rem; font-weight: 600;">Welcome back, <span id="welcomeUser"></span>!</p>
+        <p style="color: var(--text-secondary); font-size: 0.88rem; margin-top: 0.4rem;"><a href="forum.html">Go to the forum →</a></p>
       </div>
       <div id="signupError" style="display: none; text-align: center; padding: 0.5rem 0;">
         <p style="font-size: 0.88rem;"></p>
@@ -751,7 +774,7 @@ footer .links a { color: var(--text-secondary); font-size: 0.82rem; }
       <div class="member-count">
         <span class="count" id="memberCount">0</span> collaborators and counting
       </div>
-      <p style="color: var(--text-dim); font-size: 0.82rem; margin-top: 0.8rem; text-align: center;">Already have an account? <a href="forum.html">Go to the forum</a></p>
+      <p id="authToggle" style="color: var(--text-dim); font-size: 0.82rem; margin-top: 0.8rem; text-align: center;">Already have an account? <a href="#" onclick="toggleMainAuth(); return false;">Sign in</a></p>
     </div>
   </div>
 </section>
@@ -839,6 +862,72 @@ async function joinMovement() {
 }
 
 document.getElementById('passwordInput').addEventListener('keypress', function(e) { if (e.key === 'Enter') joinMovement(); });
+document.getElementById('loginPass').addEventListener('keypress', function(e) { if (e.key === 'Enter') doMainLogin(); });
+
+var isLoginMode = false;
+function toggleMainAuth() {
+  isLoginMode = !isLoginMode;
+  var errBox = document.getElementById('signupError'); errBox.style.display = 'none';
+  if (isLoginMode) {
+    document.getElementById('signupForm').style.display = 'none';
+    document.getElementById('loginForm').style.display = 'block';
+    document.getElementById('authDesc').textContent = 'Sign in to access the forum.';
+    document.getElementById('authToggle').innerHTML = 'Don\'t have an account? <a href="#" onclick="toggleMainAuth(); return false;">Sign up</a>';
+  } else {
+    document.getElementById('signupForm').style.display = 'block';
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('authDesc').textContent = 'No leaders. Everyone is a collaborator. Sign up to join the forum and stand with us.';
+    document.getElementById('authToggle').innerHTML = 'Already have an account? <a href="#" onclick="toggleMainAuth(); return false;">Sign in</a>';
+  }
+}
+
+async function doMainLogin() {
+  var email = document.getElementById('loginEmail').value.trim();
+  var pass = document.getElementById('loginPass').value;
+  var btn = document.getElementById('loginBtn');
+  var errBox = document.getElementById('signupError');
+  var errP = errBox.querySelector('p');
+  errBox.style.display = 'none';
+
+  if (!email || !pass) { errP.textContent = 'Email and password required.'; errP.style.color = '#E05252'; errBox.style.display = 'block'; return; }
+
+  btn.textContent = 'Signing in...'; btn.disabled = true; btn.style.opacity = '0.6';
+
+  try {
+    var res = await fetch(SB_AUTH + '/token?grant_type=password', {
+      method: 'POST',
+      headers: { 'apikey': SB_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, password: pass })
+    });
+    var data = await res.json();
+
+    if (res.ok && data.access_token) {
+      var profileRes = await fetch(SB_URL + '/profiles?email=eq.' + encodeURIComponent(email) + '&select=*', { headers: HEADERS });
+      var profiles = await profileRes.json();
+      var user = profiles.length > 0 ? profiles[0] : { username: email.split('@')[0] };
+      localStorage.setItem('forum_user', JSON.stringify(user));
+      localStorage.setItem('forum_token', data.access_token);
+      document.getElementById('loginForm').style.display = 'none';
+      document.getElementById('authToggle').style.display = 'none';
+      document.getElementById('authDesc').style.display = 'none';
+      document.getElementById('welcomeUser').textContent = '@' + user.username;
+      document.getElementById('loginSuccess').style.display = 'block';
+    } else {
+      if (data.error_description && data.error_description.includes('Email not confirmed')) {
+        errP.textContent = 'Please confirm your email first! Check your inbox.'; errP.style.color = '#F0B040';
+      } else if (data.error_description && data.error_description.includes('Invalid')) {
+        errP.textContent = 'Wrong email or password.'; errP.style.color = '#E05252';
+      } else {
+        errP.textContent = data.error_description || 'Login failed.'; errP.style.color = '#E05252';
+      }
+      errBox.style.display = 'block'; btn.textContent = 'Sign in'; btn.disabled = false; btn.style.opacity = '1';
+    }
+  } catch(e) {
+    errP.textContent = 'Network error.'; errP.style.color = '#E05252';
+    errBox.style.display = 'block'; btn.textContent = 'Sign in'; btn.disabled = false; btn.style.opacity = '1';
+  }
+}
+
 updateCounter();
 </script>
 
