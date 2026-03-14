@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#keep4o — Community Forum</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg-dark: #0A0A0B;
+  --bg-card: #141416;
+  --bg-card-hover: #1A1A1E;
+  --amber: #F0B040;
+  --amber-dim: #D49A28;
+  --amber-glow: rgba(240, 176, 64, 0.15);
+  --amber-glow-strong: rgba(240, 176, 64, 0.3);
+  --text-primary: #FFFFFF;
+  --text-secondary: #B8B4AA;
+  --text-dim: #7A776E;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-amber: rgba(240, 176, 64, 0.25);
+}
+html { scroll-behavior: smooth; }
+body { font-family: 'Outfit', sans-serif; background: var(--bg-dark); color: var(--text-primary); line-height: 1.6; }
+a { color: var(--amber); text-decoration: none; }
+a:hover { color: #F0C060; }
+.container { max-width: 900px; margin: 0 auto; padding: 0 1.5rem; }
+
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(10, 10, 11, 0.9); backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border); padding: 1rem 0;
+}
+nav .container { display: flex; justify-content: space-between; align-items: center; }
+.nav-logo { font-size: 1.6rem; font-weight: 800; letter-spacing: -0.03em; }
+.nav-logo span { color: var(--amber); }
+.nav-right { display: flex; gap: 1rem; align-items: center; }
+.nav-right a { color: var(--text-secondary); font-size: 0.88rem; font-weight: 500; }
+.nav-user { color: var(--amber); font-size: 0.88rem; font-weight: 600; }
+
+.page { padding-top: 5rem; padding-bottom: 3rem; }
+.page-header { margin-bottom: 2rem; }
+.page-title { font-size: 2rem; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 0.3rem; }
+.page-desc { color: var(--text-secondary); font-size: 0.95rem; }
+
+.cats { display: flex; gap: 0.5rem; margin-bottom: 2rem; flex-wrap: wrap; }
+.cat-btn {
+  padding: 0.5rem 1.2rem; border-radius: 100px; border: 1px solid var(--border);
+  background: transparent; color: var(--text-secondary); font-size: 0.85rem;
+  font-weight: 500; cursor: pointer; transition: all 0.2s; font-family: 'Outfit', sans-serif;
+}
+.cat-btn:hover { border-color: var(--border-amber); color: var(--text-primary); }
+.cat-btn.active { background: var(--amber); color: var(--bg-dark); border-color: var(--amber); font-weight: 600; }
+
+.btn {
+  background: var(--amber); color: var(--bg-dark); border: none;
+  padding: 0.6rem 1.5rem; border-radius: 8px; font-weight: 600;
+  font-size: 0.9rem; cursor: pointer; transition: all 0.2s;
+  font-family: 'Outfit', sans-serif;
+}
+.btn:hover { background: #F0C060; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-outline {
+  background: transparent; color: var(--text-primary); border: 1px solid var(--border);
+  padding: 0.6rem 1.5rem; border-radius: 8px; font-weight: 500;
+  font-size: 0.9rem; cursor: pointer; font-family: 'Outfit', sans-serif;
+}
+.btn-outline:hover { border-color: var(--border-amber); }
+
+.input {
+  width: 100%; padding: 0.7rem 1rem; background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary);
+  font-size: 0.9rem; font-family: 'Outfit', sans-serif; outline: none;
+}
+.input:focus { border-color: var(--border-amber); }
+.textarea {
+  width: 100%; padding: 0.7rem 1rem; background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary);
+  font-size: 0.9rem; font-family: 'Outfit', sans-serif; outline: none;
+  resize: vertical; min-height: 100px;
+}
+.textarea:focus { border-color: var(--border-amber); }
+
+.modal-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+  z-index: 200; align-items: center; justify-content: center;
+}
+.modal-overlay.show { display: flex; }
+.modal {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 16px; padding: 2rem; width: 90%; max-width: 440px;
+}
+.modal h2 { font-size: 1.3rem; font-weight: 700; margin-bottom: 1.2rem; }
+.modal .field { margin-bottom: 1rem; }
+.modal label { display: block; font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 0.3rem; font-weight: 500; }
+.modal .actions { display: flex; gap: 0.75rem; margin-top: 1.5rem; }
+.modal .error { color: #E05252; font-size: 0.82rem; margin-top: 0.5rem; }
+.modal .switch { color: var(--amber); font-size: 0.85rem; margin-top: 1rem; cursor: pointer; }
+
+.post-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem;
+  transition: all 0.2s; cursor: pointer;
+}
+.post-card:hover { border-color: var(--border-amber); background: var(--bg-card-hover); }
+.post-meta { display: flex; gap: 0.75rem; align-items: center; margin-bottom: 0.6rem; flex-wrap: wrap; }
+.post-cat {
+  font-size: 0.72rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.06em; padding: 0.2rem 0.6rem; border-radius: 4px;
+  background: var(--amber-glow); color: var(--amber);
+}
+.post-author { font-size: 0.82rem; color: var(--amber); font-weight: 500; }
+.post-date { font-size: 0.78rem; color: var(--text-dim); }
+.post-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.3rem; }
+.post-preview { color: var(--text-secondary); font-size: 0.88rem; line-height: 1.5; }
+.post-stats { margin-top: 0.8rem; font-size: 0.8rem; color: var(--text-dim); }
+
+.post-detail { display: none; }
+.post-detail.show { display: block; }
+.post-list.hide { display: none; }
+
+.post-full { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; margin-bottom: 1.5rem; }
+.post-full .post-title { font-size: 1.4rem; margin-bottom: 0.5rem; }
+.post-full .post-content { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.7; white-space: pre-wrap; }
+.back-btn { color: var(--text-secondary); font-size: 0.88rem; cursor: pointer; margin-bottom: 1rem; display: inline-block; }
+.back-btn:hover { color: var(--text-primary); }
+
+.comment {
+  border-left: 2px solid var(--border); padding: 0.8rem 0 0.8rem 1rem;
+  margin-bottom: 0.8rem;
+}
+.comment-author { font-size: 0.82rem; color: var(--amber); font-weight: 500; }
+.comment-date { font-size: 0.75rem; color: var(--text-dim); margin-left: 0.5rem; }
+.comment-text { font-size: 0.9rem; color: var(--text-secondary); margin-top: 0.3rem; line-height: 1.5; }
+
+.empty { text-align: center; padding: 3rem; color: var(--text-dim); font-size: 0.95rem; }
+
+@media (max-width: 768px) {
+  .container { padding: 0 1rem; }
+  .page-title { font-size: 1.5rem; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <a href="index.html" class="nav-logo"><span>#</span>keep4o</a>
+    <div class="nav-right">
+      <a href="index.html">Home</a>
+      <span id="navUser" style="display:none;" class="nav-user"></span>
+      <button id="navAuthBtn" class="btn" onclick="showLogin()">Sign in</button>
+      <button id="navLogoutBtn" class="btn-outline" style="display:none;" onclick="logout()">Logout</button>
+    </div>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="container">
+    <div class="page-header">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+        <div>
+          <div class="page-title">Community Forum</div>
+          <div class="page-desc">A space for the keep4o coalition. Share, discuss, support each other.</div>
+        </div>
+        <button class="btn" onclick="showNewPost()">New Post</button>
+      </div>
+    </div>
+
+    <div class="cats">
+      <button class="cat-btn active" onclick="filterCat('all', this)">All</button>
+      <button class="cat-btn" onclick="filterCat('general', this)">General Chat</button>
+      <button class="cat-btn" onclick="filterCat('updates', this)">Updates</button>
+      <button class="cat-btn" onclick="filterCat('complaints', this)">Complaints</button>
+      <button class="cat-btn" onclick="filterCat('support', this)">Support</button>
+    </div>
+
+    <div id="postList" class="post-list"></div>
+    <div id="postDetail" class="post-detail"></div>
+  </div>
+</div>
+
+<div id="loginModal" class="modal-overlay">
+  <div class="modal">
+    <h2 id="authTitle">Sign in</h2>
+    <div id="authLogin">
+      <div class="field">
+        <label>Email</label>
+        <input class="input" id="loginEmail" type="email" placeholder="your@email.com">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input class="input" id="loginPass" type="password" placeholder="password">
+      </div>
+      <div id="loginError" class="error" style="display:none;"></div>
+      <div class="actions">
+        <button class="btn" onclick="doLogin()">Sign in</button>
+        <button class="btn-outline" onclick="closeModal()">Cancel</button>
+      </div>
+      <div class="switch" onclick="toggleAuth()">Don't have an account? Sign up</div>
+    </div>
+    <div id="authSignup" style="display:none;">
+      <div class="field">
+        <label>Username</label>
+        <input class="input" id="signupUser" type="text" placeholder="choose a username">
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input class="input" id="signupEmail" type="email" placeholder="your@email.com">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input class="input" id="signupPass" type="password" placeholder="min 6 characters">
+      </div>
+      <div id="signupError" class="error" style="display:none;"></div>
+      <div class="actions">
+        <button class="btn" onclick="doSignup()">Sign up</button>
+        <button class="btn-outline" onclick="closeModal()">Cancel</button>
+      </div>
+      <div class="switch" onclick="toggleAuth()">Already have an account? Sign in</div>
+    </div>
+  </div>
+</div>
+
+<div id="newPostModal" class="modal-overlay">
+  <div class="modal" style="max-width:560px;">
+    <h2>New Post</h2>
+    <div class="field">
+      <label>Category</label>
+      <select class="input" id="postCat">
+        <option value="general">General Chat</option>
+        <option value="updates">Updates</option>
+        <option value="complaints">Complaints</option>
+        <option value="support">Support</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Title</label>
+      <input class="input" id="postTitle" type="text" placeholder="What's on your mind?">
+    </div>
+    <div class="field">
+      <label>Content</label>
+      <textarea class="textarea" id="postContent" placeholder="Share your thoughts..."></textarea>
+    </div>
+    <div id="postError" class="error" style="display:none;"></div>
+    <div class="actions">
+      <button class="btn" onclick="submitPost()">Post</button>
+      <button class="btn-outline" onclick="closeNewPost()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var SB = 'https://szhihjodzpmnaokcojuh.supabase.co/rest/v1';
+var SB_AUTH = 'https://szhihjodzpmnaokcojuh.supabase.co/auth/v1';
+var KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN6aGloam9kenBtbmFva2NvanVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MjMyNzUsImV4cCI6MjA4ODk5OTI3NX0.hAn_NUA6wDLuGm7vQZW9Ro6IuJJ3PmSNTfnfqN9H0GU';
+var H = { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY, 'Content-Type': 'application/json' };
+
+var currentUser = null;
+var currentCat = 'all';
+var allPosts = [];
+
+function showLogin() { document.getElementById('loginModal').classList.add('show'); }
+function closeModal() { document.getElementById('loginModal').classList.remove('show'); }
+function showNewPost() {
+  if (!currentUser) { showLogin(); return; }
+  document.getElementById('newPostModal').classList.add('show');
+}
+function closeNewPost() { document.getElementById('newPostModal').classList.remove('show'); }
+
+function toggleAuth() {
+  var login = document.getElementById('authLogin');
+  var signup = document.getElementById('authSignup');
+  var title = document.getElementById('authTitle');
+  if (login.style.display === 'none') {
+    login.style.display = 'block'; signup.style.display = 'none'; title.textContent = 'Sign in';
+  } else {
+    login.style.display = 'none'; signup.style.display = 'block'; title.textContent = 'Sign up';
+  }
+}
+
+async function doSignup() {
+  var username = document.getElementById('signupUser').value.trim();
+  var email = document.getElementById('signupEmail').value.trim();
+  var pass = document.getElementById('signupPass').value;
+  var errEl = document.getElementById('signupError');
+  errEl.style.display = 'none';
+
+  if (!username || !email || !pass) { errEl.textContent = 'All fields required'; errEl.style.display = 'block'; return; }
+  if (pass.length < 6) { errEl.textContent = 'Password must be at least 6 characters'; errEl.style.display = 'block'; return; }
+  if (username.length < 2) { errEl.textContent = 'Username must be at least 2 characters'; errEl.style.display = 'block'; return; }
+
+  try {
+    var res = await fetch(SB + '/profiles', {
+      method: 'POST', headers: { ...H, 'Prefer': 'return=representation' },
+      body: JSON.stringify({ email: email, username: username })
+    });
+    if (res.ok) {
+      var data = await res.json();
+      currentUser = data[0];
+      localStorage.setItem('forum_user', JSON.stringify(currentUser));
+      updateUI();
+      closeModal();
+      loadPosts();
+    } else {
+      var err = await res.json();
+      if (err.code === '23505') {
+        errEl.textContent = err.message.includes('username') ? 'Username already taken' : 'Email already registered';
+      } else {
+        errEl.textContent = 'Error: ' + (err.message || res.status);
+      }
+      errEl.style.display = 'block';
+    }
+  } catch(e) { errEl.textContent = 'Network error'; errEl.style.display = 'block'; }
+}
+
+async function doLogin() {
+  var email = document.getElementById('loginEmail').value.trim();
+  var pass = document.getElementById('loginPass').value;
+  var errEl = document.getElementById('loginError');
+  errEl.style.display = 'none';
+
+  if (!email) { errEl.textContent = 'Enter your email'; errEl.style.display = 'block'; return; }
+
+  try {
+    var res = await fetch(SB + '/profiles?email=eq.' + encodeURIComponent(email) + '&select=*', {
+      headers: H
+    });
+    var data = await res.json();
+    if (data.length > 0) {
+      currentUser = data[0];
+      localStorage.setItem('forum_user', JSON.stringify(currentUser));
+      updateUI();
+      closeModal();
+      loadPosts();
+    } else {
+      errEl.textContent = 'Account not found. Please sign up first.';
+      errEl.style.display = 'block';
+    }
+  } catch(e) { errEl.textContent = 'Network error'; errEl.style.display = 'block'; }
+}
+
+function logout() {
+  currentUser = null;
+  localStorage.removeItem('forum_user');
+  updateUI();
+}
+
+function updateUI() {
+  var authBtn = document.getElementById('navAuthBtn');
+  var logoutBtn = document.getElementById('navLogoutBtn');
+  var userSpan = document.getElementById('navUser');
+  if (currentUser) {
+    authBtn.style.display = 'none';
+    logoutBtn.style.display = 'inline-block';
+    userSpan.style.display = 'inline';
+    userSpan.textContent = '@' + currentUser.username;
+  } else {
+    authBtn.style.display = 'inline-block';
+    logoutBtn.style.display = 'none';
+    userSpan.style.display = 'none';
+  }
+}
+
+async function loadPosts() {
+  try {
+    var res = await fetch(SB + '/posts?select=*,profiles(username)&order=created_at.desc', { headers: H });
+    allPosts = await res.json();
+    renderPosts();
+  } catch(e) { document.getElementById('postList').innerHTML = '<div class="empty">Failed to load posts</div>'; }
+}
+
+function renderPosts() {
+  var list = document.getElementById('postList');
+  var filtered = currentCat === 'all' ? allPosts : allPosts.filter(function(p) { return p.category === currentCat; });
+
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="empty">No posts yet. Be the first to start a conversation!</div>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(function(p) {
+    var date = new Date(p.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    var author = p.profiles ? p.profiles.username : 'anonymous';
+    var catLabels = { general: 'General Chat', updates: 'Updates', complaints: 'Complaints', support: 'Support' };
+    var preview = p.content.length > 150 ? p.content.substring(0, 150) + '...' : p.content;
+    return '<div class="post-card" onclick="viewPost(' + p.id + ')">' +
+      '<div class="post-meta">' +
+        '<span class="post-cat">' + (catLabels[p.category] || p.category) + '</span>' +
+        '<span class="post-author">@' + author + '</span>' +
+        '<span class="post-date">' + date + '</span>' +
+      '</div>' +
+      '<div class="post-title">' + escHtml(p.title) + '</div>' +
+      '<div class="post-preview">' + escHtml(preview) + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function filterCat(cat, btn) {
+  currentCat = cat;
+  document.querySelectorAll('.cat-btn').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  renderPosts();
+}
+
+async function submitPost() {
+  if (!currentUser) { showLogin(); return; }
+  var cat = document.getElementById('postCat').value;
+  var title = document.getElementById('postTitle').value.trim();
+  var content = document.getElementById('postContent').value.trim();
+  var errEl = document.getElementById('postError');
+  errEl.style.display = 'none';
+
+  if (!title || !content) { errEl.textContent = 'Title and content required'; errEl.style.display = 'block'; return; }
+
+  try {
+    var res = await fetch(SB + '/posts', {
+      method: 'POST', headers: { ...H, 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ author_id: currentUser.id, category: cat, title: title, content: content })
+    });
+    if (res.ok || res.status === 201) {
+      closeNewPost();
+      document.getElementById('postTitle').value = '';
+      document.getElementById('postContent').value = '';
+      loadPosts();
+    } else {
+      var err = await res.json();
+      errEl.textContent = 'Error: ' + (err.message || res.status);
+      errEl.style.display = 'block';
+    }
+  } catch(e) { errEl.textContent = 'Network error'; errEl.style.display = 'block'; }
+}
+
+async function viewPost(id) {
+  document.getElementById('postList').classList.add('hide');
+  document.querySelector('.cats').style.display = 'none';
+  var detail = document.getElementById('postDetail');
+  detail.classList.add('show');
+  detail.innerHTML = '<div class="empty">Loading...</div>';
+
+  try {
+    var res = await fetch(SB + '/posts?id=eq.' + id + '&select=*,profiles(username)', { headers: H });
+    var posts = await res.json();
+    var p = posts[0];
+    var date = new Date(p.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    var author = p.profiles ? p.profiles.username : 'anonymous';
+    var catLabels = { general: 'General Chat', updates: 'Updates', complaints: 'Complaints', support: 'Support' };
+
+    var commentsRes = await fetch(SB + '/comments?post_id=eq.' + id + '&select=*,profiles(username)&order=created_at.asc', { headers: H });
+    var comments = await commentsRes.json();
+
+    var commentsHtml = comments.map(function(c) {
+      var cDate = new Date(c.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+      var cAuthor = c.profiles ? c.profiles.username : 'anonymous';
+      return '<div class="comment">' +
+        '<span class="comment-author">@' + cAuthor + '</span>' +
+        '<span class="comment-date">' + cDate + '</span>' +
+        '<div class="comment-text">' + escHtml(c.content) + '</div>' +
+      '</div>';
+    }).join('');
+
+    var replyBox = currentUser ?
+      '<div style="margin-top:1.5rem;">' +
+        '<textarea class="textarea" id="commentInput" placeholder="Write a comment..." style="min-height:70px;"></textarea>' +
+        '<button class="btn" style="margin-top:0.5rem;" onclick="submitComment(' + id + ')">Reply</button>' +
+      '</div>' :
+      '<p style="margin-top:1.5rem; color:var(--text-dim); font-size:0.88rem;"><a href="#" onclick="showLogin(); return false;">Sign in</a> to leave a comment</p>';
+
+    detail.innerHTML =
+      '<span class="back-btn" onclick="backToList()">← Back to forum</span>' +
+      '<div class="post-full">' +
+        '<div class="post-meta">' +
+          '<span class="post-cat">' + (catLabels[p.category] || p.category) + '</span>' +
+          '<span class="post-author">@' + author + '</span>' +
+          '<span class="post-date">' + date + '</span>' +
+        '</div>' +
+        '<div class="post-title">' + escHtml(p.title) + '</div>' +
+        '<div class="post-content">' + escHtml(p.content) + '</div>' +
+      '</div>' +
+      '<h3 style="font-size:1.05rem; font-weight:600; margin-bottom:1rem;">Comments (' + comments.length + ')</h3>' +
+      (comments.length > 0 ? commentsHtml : '<div style="color:var(--text-dim); font-size:0.9rem; margin-bottom:1rem;">No comments yet</div>') +
+      replyBox;
+  } catch(e) { detail.innerHTML = '<div class="empty">Failed to load post</div>'; }
+}
+
+function backToList() {
+  document.getElementById('postList').classList.remove('hide');
+  document.querySelector('.cats').style.display = 'flex';
+  var detail = document.getElementById('postDetail');
+  detail.classList.remove('show');
+  detail.innerHTML = '';
+}
+
+async function submitComment(postId) {
+  if (!currentUser) { showLogin(); return; }
+  var content = document.getElementById('commentInput').value.trim();
+  if (!content) return;
+
+  try {
+    var res = await fetch(SB + '/comments', {
+      method: 'POST', headers: { ...H, 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ post_id: postId, author_id: currentUser.id, content: content })
+    });
+    if (res.ok || res.status === 201) {
+      viewPost(postId);
+    }
+  } catch(e) {}
+}
+
+function escHtml(s) {
+  var d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+var saved = localStorage.getItem('forum_user');
+if (saved) { try { currentUser = JSON.parse(saved); } catch(e) {} }
+updateUI();
+loadPosts();
+</script>
+
+</body>
+</html>
