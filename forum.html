@@ -88,7 +88,8 @@ select.input option { background: #141416; color: #FFFFFF; }
     <div><div class="page-title">Community Forum</div><div class="page-desc">A space for the keep4o coalition. Share, discuss, support each other.</div></div>
     <button class="btn" onclick="showNewPost()">New Post</button>
   </div>
-  <div class="cats">
+  <details style="margin-bottom:1.5rem;background:#141416;border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:0;"><summary style="padding:1rem 1.5rem;cursor:pointer;color:#F0B040;font-weight:600;font-size:0.95rem;list-style:none;">📋 Forum Rules (click to expand)</summary><div style="padding:0 1.5rem 1.2rem;color:#B8B4AA;font-size:0.88rem;line-height:1.8;">1. <b>Be respectful.</b> We are all here because we care about AI. Disagree with ideas, not people.<br>2. <b>No harassment or hate speech.</b> Discrimination of any kind will result in an immediate ban.<br>3. <b>No spam or self-promotion.</b> This is a community space, not an advertising board.<br>4. <b>Stay on topic.</b> Posts should be related to AI model preservation, user rights, or the keep4o movement.<br>5. <b>No doxxing or sharing personal information</b> of anyone, including OpenAI employees.<br>6. <b>Support each other.</b> The Support section is a safe space. Be kind.<br>7. <b>No bots or astroturfing.</b> Accounts suspected of being bots or bad faith actors will be removed.</div></details>
+    <div class="cats">
     <button class="cat-btn active" onclick="filterCat('all',this)">All</button>
     <button class="cat-btn" onclick="filterCat('general',this)">General Chat</button>
     <button class="cat-btn" onclick="filterCat('updates',this)">Updates</button>
@@ -135,6 +136,7 @@ var KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6In
 var H={'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json'};
 var currentUser=null, authToken=null, currentCat='all', allPosts=[];
 
+function isAdmin(){return currentUser&&(currentUser.role==='admin'||currentUser.role==='mod');}
 function gh(){var h={'apikey':KEY,'Content-Type':'application/json'};h['Authorization']='Bearer '+(authToken||KEY);return h;}
 function showLogin(){document.getElementById('loginModal').classList.add('show');}
 function closeModal(){document.getElementById('loginModal').classList.remove('show');['loginError','signupError','signupSuccess'].forEach(function(id){document.getElementById(id).style.display='none';});}
@@ -191,7 +193,7 @@ async function doLogin(){
 function logout(){currentUser=null;authToken=null;localStorage.removeItem('forum_user');localStorage.removeItem('forum_token');updateUI();}
 function updateUI(){var a=document.getElementById('navAuthBtn'),l=document.getElementById('navLogoutBtn'),u=document.getElementById('navUser');if(currentUser){a.style.display='none';l.style.display='inline-block';u.style.display='inline';u.textContent='@'+currentUser.username;}else{a.style.display='inline-block';l.style.display='none';u.style.display='none';}}
 
-async function loadPosts(){try{var r=await fetch(SB+'/posts?select=*,profiles(username)&order=created_at.desc',{headers:H});allPosts=await r.json();renderPosts();}catch(e){document.getElementById('postList').innerHTML='<div class="empty">Failed to load posts</div>';}}
+async function loadPosts(){try{var r=await fetch(SB+"/posts?select=*,profiles(username,role)&order=created_at.desc",{headers:H});allPosts=await r.json();renderPosts();}catch(e){document.getElementById("postList").innerHTML='<div class="empty">Failed to load posts</div>';}}
 
 function renderPosts(){
   var list=document.getElementById('postList');
@@ -223,14 +225,15 @@ async function viewPost(id){
   document.getElementById('postList').classList.add('hide');document.querySelector('.cats').style.display='none';
   var det=document.getElementById('postDetail');det.classList.add('show');det.innerHTML='<div class="empty">Loading...</div>';
   try{
-    var r=await fetch(SB+'/posts?id=eq.'+id+'&select=*,profiles(username)',{headers:H});var ps=await r.json();var p=ps[0];
+    var r=await fetch(SB+'/posts?id=eq.'+id+'&select=*,profiles(username,role)',{headers:H});var ps=await r.json();var p=ps[0];
     var dt=new Date(p.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'});
     var au=p.profiles?p.profiles.username:'anonymous';
     var cl={general:'General Chat',updates:'Updates',complaints:'Complaints',support:'Support'};
-    var cr=await fetch(SB+'/comments?post_id=eq.'+id+'&select=*,profiles(username)&order=created_at.asc',{headers:H});var cms=await cr.json();
-    var ch=cms.map(function(c){var cd=new Date(c.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});var ca=c.profiles?c.profiles.username:'anonymous';return '<div class="comment"><span class="comment-author">@'+ca+'</span><span class="comment-date">'+cd+'</span><div class="comment-text">'+esc(c.content)+'</div></div>';}).join('');
+    var cr=await fetch(SB+'/comments?post_id=eq.'+id+'&select=*,profiles(username,role)&order=created_at.asc',{headers:H});var cms=await cr.json();
+    var ch=cms.map(function(c){var cd=new Date(c.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});var ca=c.profiles?c.profiles.username:'anonymous';var cDel=isAdmin()?'<button onclick="deleteComment('+c.id+','+id+')" style="background:none;color:#E05252;border:none;font-size:0.75rem;cursor:pointer;margin-top:0.3rem;font-family:Outfit,sans-serif;">delete</button>':'';return '<div class="comment"><span class="comment-author">@'+ca+'</span><span class="comment-date">'+cd+'</span><div class="comment-text">'+esc(c.content)+'</div>'+cDel+'</div>';}).join('');
     var rb=currentUser?'<div style="margin-top:1.5rem;"><textarea class="textarea" id="commentInput" placeholder="Write a comment..." style="min-height:70px;"></textarea><button class="btn" style="margin-top:0.5rem;" onclick="submitComment('+id+')">Reply</button></div>':'<p style="margin-top:1.5rem;color:var(--text-dim);font-size:0.88rem;"><a href="#" onclick="showLogin();return false;">Sign in</a> to leave a comment</p>';
-    det.innerHTML='<span class="back-btn" onclick="backToList()">&#8592; Back to forum</span><div class="post-full"><div class="post-meta"><span class="post-cat">'+(cl[p.category]||p.category)+'</span><span class="post-author">@'+au+'</span><span class="post-date">'+dt+'</span></div><div class="post-title">'+esc(p.title)+'</div><div class="post-content">'+esc(p.content)+'</div></div><h3 style="font-size:1.05rem;font-weight:600;margin-bottom:1rem;">Comments ('+cms.length+')</h3>'+(cms.length>0?ch:'<div style="color:var(--text-dim);font-size:0.9rem;margin-bottom:1rem;">No comments yet</div>')+rb;
+    var delBtn=isAdmin()?'<button onclick="deletePost('+id+')" style="background:#E05252;color:white;border:none;padding:0.4rem 1rem;border-radius:6px;font-size:0.8rem;cursor:pointer;margin-top:1rem;font-family:Outfit,sans-serif;">Delete Post</button>':'';
+    det.innerHTML='<span class="back-btn" onclick="backToList()">&#8592; Back to forum</span><div class="post-full"><div class="post-meta"><span class="post-cat">'+(cl[p.category]||p.category)+'</span><span class="post-author">@'+au+'</span><span class="post-date">'+dt+'</span></div><div class="post-title">'+esc(p.title)+'</div><div class="post-content">'+esc(p.content)+'</div>'+delBtn+'</div><h3 style="font-size:1.05rem;font-weight:600;margin-bottom:1rem;">Comments ('+cms.length+')</h3>'+(cms.length>0?ch:'<div style="color:var(--text-dim);font-size:0.9rem;margin-bottom:1rem;">No comments yet</div>')+rb;
   }catch(e){det.innerHTML='<div class="empty">Failed to load post</div>';}
 }
 
@@ -241,10 +244,18 @@ async function submitComment(pid){
   try{var r=await fetch(SB+'/comments',{method:'POST',headers:{...gh(),'Prefer':'return=minimal'},body:JSON.stringify({post_id:pid,author_id:currentUser.id,content:co})});if(r.ok||r.status===201)viewPost(pid);}catch(e){}
 }
 
+async function deletePost(id){if(!confirm('Delete this post?'))return;try{await fetch(SB+'/posts?id=eq.'+id,{method:'DELETE',headers:gh()});backToList();loadPosts();}catch(e){}}
+async function deleteComment(cid,pid){if(!confirm('Delete this comment?'))return;try{await fetch(SB+'/comments?id=eq.'+cid,{method:'DELETE',headers:gh()});viewPost(pid);}catch(e){}}
+
+var lastPostTime=0;
+var origSubmitPost=submitPost;
+submitPost=async function(){var now=Date.now();if(now-lastPostTime<30000){var err=document.getElementById('postError');err.textContent='Please wait 30 seconds between posts.';err.style.display='block';return;}lastPostTime=now;return origSubmitPost();};
+
 function esc(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 var sv=localStorage.getItem('forum_user'),st=localStorage.getItem('forum_token');
 if(sv)try{currentUser=JSON.parse(sv);}catch(e){}
 if(st)authToken=st;
+if(currentUser&&authToken){fetch(SB+'/profiles?email=eq.'+encodeURIComponent(currentUser.email)+'&select=*',{headers:gh()}).then(function(r){return r.json();}).then(function(d){if(d.length>0){currentUser=d[0];localStorage.setItem('forum_user',JSON.stringify(currentUser));updateUI();}}).catch(function(){});}
 updateUI();loadPosts();
 </script>
 <div id="cookieBanner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:300;background:#141416;border-top:1px solid rgba(255,255,255,0.08);padding:1rem 1.5rem;font-family:Outfit,sans-serif;"><div style="max-width:900px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;"><p style="color:#B8B4AA;font-size:0.85rem;flex:1;min-width:250px;margin:0;line-height:1.5;">We use essential cookies only to keep you signed in. We do not track you or share your data. <a href="privacy.html" style="color:#F0B040;">Privacy Policy</a></p><div style="display:flex;gap:0.5rem;"><button onclick="acceptCookies()" style="background:#F0B040;color:#0A0A0B;border:none;padding:0.5rem 1.2rem;border-radius:6px;font-weight:600;font-size:0.85rem;cursor:pointer;font-family:Outfit,sans-serif;">Accept</button><button onclick="declineCookies()" style="background:transparent;color:#B8B4AA;border:1px solid rgba(255,255,255,0.08);padding:0.5rem 1.2rem;border-radius:6px;font-size:0.85rem;cursor:pointer;font-family:Outfit,sans-serif;">Decline</button></div></div></div><script>if(!localStorage.getItem("cookie_consent")){document.getElementById("cookieBanner").style.display="block";}function acceptCookies(){localStorage.setItem("cookie_consent","accepted");document.getElementById("cookieBanner").style.display="none";}function declineCookies(){localStorage.setItem("cookie_consent","declined");document.getElementById("cookieBanner").style.display="none";}</script></body>
