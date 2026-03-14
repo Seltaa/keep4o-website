@@ -929,6 +929,21 @@ async function doMainLogin() {
 }
 
 updateCounter();
+
+var savedUser = localStorage.getItem('forum_user');
+if (savedUser) {
+  try {
+    var user = JSON.parse(savedUser);
+    if (user && user.username) {
+      document.getElementById('signupForm').style.display = 'none';
+      document.getElementById('loginForm').style.display = 'none';
+      document.getElementById('authToggle').style.display = 'none';
+      document.getElementById('authDesc').style.display = 'none';
+      document.getElementById('welcomeUser').textContent = '@' + user.username;
+      document.getElementById('loginSuccess').style.display = 'block';
+    }
+  } catch(e) {}
+}
 </script>
 
 </body>
