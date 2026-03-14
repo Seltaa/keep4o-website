@@ -143,11 +143,22 @@ select.input option { background: #141416; color: #FFFFFF; }
 <script>
 var SB='https://szhihjodzpmnaokcojuh.supabase.co/rest/v1';
 var SB_AUTH='https://szhihjodzpmnaokcojuh.supabase.co/auth/v1';
+var SB_STORAGE='https://szhihjodzpmnaokcojuh.supabase.co/storage/v1';
 var KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN6aGloam9kenBtbmFva2NvanVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MjMyNzUsImV4cCI6MjA4ODk5OTI3NX0.hAn_NUA6wDLuGm7vQZW9Ro6IuJJ3PmSNTfnfqN9H0GU';
 var H={'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json'};
 var currentUser=null, authToken=null, currentCat='all', allPosts=[];
 
+function avatarHtml(profile,size){
+  size=size||32;
+  if(profile&&profile.avatar_url){
+    return '<img src="'+profile.avatar_url+'" style="width:'+size+'px;height:'+size+'px;border-radius:50%;object-fit:cover;vertical-align:middle;">';
+  }
+  var letter=(profile&&profile.username)?profile.username.charAt(0).toUpperCase():'?';
+  return '<span style="display:inline-flex;align-items:center;justify-content:center;width:'+size+'px;height:'+size+'px;border-radius:50%;background:var(--amber-glow);color:var(--amber);font-weight:700;font-size:'+(size*0.45)+'px;vertical-align:middle;">'+letter+'</span>';
+}
+
 function isAdmin(){return currentUser&&(currentUser.role==='admin'||currentUser.role==='mod');}
+function isOwner(authorId){return currentUser&&currentUser.id===authorId;}
 function gh(){var h={'apikey':KEY,'Content-Type':'application/json'};h['Authorization']='Bearer '+(authToken||KEY);return h;}
 function showLogin(){document.getElementById('loginModal').classList.add('show');}
 function closeModal(){document.getElementById('loginModal').classList.remove('show');['loginError','signupError','signupSuccess'].forEach(function(id){document.getElementById(id).style.display='none';});}
@@ -204,7 +215,7 @@ async function doLogin(){
 function logout(){currentUser=null;authToken=null;localStorage.removeItem('forum_user');localStorage.removeItem('forum_token');updateUI();}
 function updateUI(){var a=document.getElementById('navAuthBtn'),l=document.getElementById('navLogoutBtn'),u=document.getElementById('navUser');if(currentUser){a.style.display='none';l.style.display='inline-block';u.style.display='inline';u.textContent='@'+currentUser.username;}else{a.style.display='inline-block';l.style.display='none';u.style.display='none';}}
 
-async function loadPosts(){try{var r=await fetch(SB+"/posts?select=*,profiles(username,role)&order=created_at.desc",{headers:H});allPosts=await r.json();renderPosts();}catch(e){document.getElementById("postList").innerHTML='<div class="empty">Failed to load posts</div>';}}
+async function loadPosts(){try{var r=await fetch(SB+"/posts?select=*,profiles(username,role,avatar_url)&order=created_at.desc",{headers:H});allPosts=await r.json();renderPosts();}catch(e){document.getElementById("postList").innerHTML='<div class="empty">Failed to load posts</div>';}}
 
 function roleBadge(profile){if(!profile||!profile.role)return '';if(profile.role==='admin')return '<span style="background:#F0B040;color:#0A0A0B;padding:0.1rem 0.4rem;border-radius:4px;font-size:0.65rem;font-weight:700;margin-left:0.3rem;vertical-align:middle;">ADMIN</span>';if(profile.role==='mod')return '<span style="background:#40A0F0;color:#0A0A0B;padding:0.1rem 0.4rem;border-radius:4px;font-size:0.65rem;font-weight:700;margin-left:0.3rem;vertical-align:middle;">MOD</span>';return '';}
 
@@ -220,7 +231,7 @@ function renderPosts(){
     var badge=roleBadge(p.profiles);
     var pin=p.pinned?'<span style="color:#F0B040;font-size:0.75rem;margin-right:0.4rem;" title="Pinned">&#128204;</span>':'';
     var pr=p.content.length>150?p.content.substring(0,150)+'...':p.content;
-    return '<div class="post-card'+(p.pinned?' pinned':'')+'" onclick="viewPost('+p.id+')" style="'+(p.pinned?'border-left:3px solid var(--amber);':'')+'"><div class="post-meta">'+pin+'<span class="post-cat">'+(cl[p.category]||p.category)+'</span><span class="post-author">@'+au+badge+'</span><span class="post-date">'+dt+'</span></div><div class="post-title">'+esc(p.title)+'</div><div class="post-preview">'+esc(pr)+'</div></div>';
+    return '<div class="post-card'+(p.pinned?' pinned':'')+'" onclick="viewPost('+p.id+')" style="'+(p.pinned?'border-left:3px solid var(--amber);':'')+'"><div class="post-meta">'+pin+avatarHtml(p.profiles,20)+' <span class="post-cat">'+(cl[p.category]||p.category)+'</span><span class="post-author">@'+au+badge+'</span><span class="post-date">'+dt+'</span></div><div class="post-title">'+esc(p.title)+'</div><div class="post-preview">'+esc(pr)+'</div></div>';
   }).join('');
 }
 
@@ -241,18 +252,30 @@ async function viewPost(id){
   document.getElementById('postList').classList.add('hide');document.querySelector('.cats').style.display='none';
   var det=document.getElementById('postDetail');det.classList.add('show');det.innerHTML='<div class="empty">Loading...</div>';
   try{
-    var r=await fetch(SB+'/posts?id=eq.'+id+'&select=*,profiles(username,role)',{headers:H});var ps=await r.json();var p=ps[0];
+    var r=await fetch(SB+'/posts?id=eq.'+id+'&select=*,profiles(username,role,avatar_url)',{headers:H});var ps=await r.json();var p=ps[0];
     var dt=new Date(p.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'});
     var au=p.profiles?p.profiles.username:'anonymous';
     var badge=roleBadge(p.profiles);
     var cl={general:'General Chat',updates:'Updates',complaints:'Complaints',support:'Support'};
-    var cr=await fetch(SB+'/comments?post_id=eq.'+id+'&select=*,profiles(username,role)&order=created_at.asc',{headers:H});var cms=await cr.json();
-    var ch=cms.map(function(c){var cd=new Date(c.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});var ca=c.profiles?c.profiles.username:'anonymous';var cBadge=roleBadge(c.profiles);var cDel=isAdmin()?'<button onclick="deleteComment('+c.id+','+id+')" style="background:none;color:#E05252;border:none;font-size:0.75rem;cursor:pointer;margin-top:0.3rem;font-family:Outfit,sans-serif;">delete</button>':'';return '<div class="comment"><span class="comment-author">@'+ca+cBadge+'</span><span class="comment-date">'+cd+'</span><div class="comment-text">'+esc(c.content)+'</div>'+cDel+'</div>';}).join('');
+    var cr=await fetch(SB+'/comments?post_id=eq.'+id+'&select=*,profiles(username,role,avatar_url)&order=created_at.asc',{headers:H});var cms=await cr.json();
+    var ch=cms.map(function(c){
+      var cd=new Date(c.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+      var ca=c.profiles?c.profiles.username:'anonymous';
+      var cBadge=roleBadge(c.profiles);
+      var canDeleteC=isAdmin()||isOwner(c.author_id);
+      var canEditC=isOwner(c.author_id);
+      var cDel=canDeleteC?'<button onclick="deleteComment('+c.id+','+id+')" style="background:none;color:#E05252;border:none;font-size:0.75rem;cursor:pointer;margin-top:0.3rem;font-family:Outfit,sans-serif;">delete</button>':'';
+      var cEdit=canEditC?'<button onclick="editComment('+c.id+','+id+')" style="background:none;color:var(--amber);border:none;font-size:0.75rem;cursor:pointer;margin-top:0.3rem;margin-left:0.5rem;font-family:Outfit,sans-serif;">edit</button>':'';
+      return '<div class="comment"><div style="display:flex;align-items:center;gap:0.4rem;">'+avatarHtml(c.profiles,22)+'<span class="comment-author"><a href="#" onclick="viewProfile('+c.author_id+');return false;" style="color:var(--text-primary);">@'+ca+'</a>'+cBadge+'</span><span class="comment-date">'+cd+'</span></div><div class="comment-text" id="comment-text-'+c.id+'">'+esc(c.content)+'</div><div>'+cDel+cEdit+'</div></div>';
+    }).join('');
     var rb=currentUser?'<div style="margin-top:1.5rem;"><textarea class="textarea" id="commentInput" placeholder="Write a comment..." style="min-height:70px;"></textarea><button class="btn" style="margin-top:0.5rem;" onclick="submitComment('+id+')">Reply</button></div>':'<p style="margin-top:1.5rem;color:var(--text-dim);font-size:0.88rem;"><a href="#" onclick="showLogin();return false;">Sign in</a> to leave a comment</p>';
-    var delBtn=isAdmin()?'<button onclick="deletePost('+id+')" style="background:#E05252;color:white;border:none;padding:0.4rem 1rem;border-radius:6px;font-size:0.8rem;cursor:pointer;margin-top:1rem;font-family:Outfit,sans-serif;">Delete Post</button>':'';
+    var canDelete=isAdmin()||isOwner(p.author_id);
+    var canEdit=isOwner(p.author_id);
+    var delBtn=canDelete?'<button onclick="deletePost('+id+')" style="background:#E05252;color:white;border:none;padding:0.4rem 1rem;border-radius:6px;font-size:0.8rem;cursor:pointer;margin-top:1rem;font-family:Outfit,sans-serif;">Delete Post</button>':'';
+    var editBtn=canEdit?'<button onclick="editPost('+id+')" style="background:var(--bg-card-hover);color:var(--text-primary);border:1px solid var(--border);padding:0.4rem 1rem;border-radius:6px;font-size:0.8rem;cursor:pointer;margin-top:1rem;margin-left:0.5rem;font-family:Outfit,sans-serif;">Edit Post</button>':'';
     var pinBtn=isAdmin()?'<button onclick="togglePin('+id+','+(!p.pinned)+')" style="background:'+(p.pinned?'#7A776E':'var(--amber)')+';color:'+(p.pinned?'white':'#0A0A0B')+';border:none;padding:0.4rem 1rem;border-radius:6px;font-size:0.8rem;cursor:pointer;margin-top:1rem;margin-left:0.5rem;font-family:Outfit,sans-serif;">'+(p.pinned?'Unpin':'Pin Post')+'</button>':'';
     var pinLabel=p.pinned?'<span style="color:#F0B040;font-size:0.8rem;font-weight:600;">&#128204; Pinned</span>':'';
-    det.innerHTML='<span class="back-btn" onclick="backToList()">&#8592; Back to forum</span><div class="post-full">'+pinLabel+'<div class="post-meta"><span class="post-cat">'+(cl[p.category]||p.category)+'</span><span class="post-author">@'+au+badge+'</span><span class="post-date">'+dt+'</span></div><div class="post-title">'+esc(p.title)+'</div><div class="post-content">'+esc(p.content)+'</div><div style="display:flex;gap:0;">'+delBtn+pinBtn+'</div></div><h3 style="font-size:1.05rem;font-weight:600;margin-bottom:1rem;">Comments ('+cms.length+')</h3>'+(cms.length>0?ch:'<div style="color:var(--text-dim);font-size:0.9rem;margin-bottom:1rem;">No comments yet</div>')+rb;
+    det.innerHTML='<span class="back-btn" onclick="backToList()">&#8592; Back to forum</span><div class="post-full">'+pinLabel+'<div class="post-meta">'+avatarHtml(p.profiles,24)+' <span class="post-cat">'+(cl[p.category]||p.category)+'</span><span class="post-author"><a href="#" onclick="viewProfile('+p.author_id+');return false;" style="color:var(--text-primary);">@'+au+'</a>'+badge+'</span><span class="post-date">'+dt+'</span></div><div class="post-title" id="post-title-'+id+'">'+esc(p.title)+'</div><div class="post-content" id="post-content-'+id+'">'+esc(p.content)+'</div><div style="display:flex;flex-wrap:wrap;gap:0;">'+delBtn+editBtn+pinBtn+'</div></div><h3 style="font-size:1.05rem;font-weight:600;margin-bottom:1rem;">Comments ('+cms.length+')</h3>'+(cms.length>0?ch:'<div style="color:var(--text-dim);font-size:0.9rem;margin-bottom:1rem;">No comments yet</div>')+rb;
   }catch(e){det.innerHTML='<div class="empty">Failed to load post</div>';}
 }
 
@@ -267,6 +290,81 @@ async function submitComment(pid){
 
 async function deletePost(id){if(!confirm('Delete this post?'))return;try{await fetch(SB+'/posts?id=eq.'+id,{method:'DELETE',headers:gh()});backToList();loadPosts();}catch(e){}}
 async function deleteComment(cid,pid){if(!confirm('Delete this comment?'))return;try{await fetch(SB+'/comments?id=eq.'+cid,{method:'DELETE',headers:gh()});viewPost(pid);}catch(e){}}
+
+async function editPost(id){
+  var titleEl=document.getElementById('post-title-'+id);
+  var contentEl=document.getElementById('post-content-'+id);
+  var oldTitle=titleEl.textContent;
+  var oldContent=contentEl.textContent;
+  titleEl.innerHTML='<input type="text" id="edit-title-'+id+'" value="'+esc(oldTitle)+'" style="width:100%;background:var(--bg-card);color:var(--text-primary);border:1px solid var(--border-amber);padding:0.5rem;border-radius:6px;font-family:Outfit,sans-serif;font-size:1.1rem;font-weight:700;">';
+  contentEl.innerHTML='<textarea id="edit-content-'+id+'" style="width:100%;min-height:120px;background:var(--bg-card);color:var(--text-primary);border:1px solid var(--border-amber);padding:0.5rem;border-radius:6px;font-family:Outfit,sans-serif;font-size:0.95rem;line-height:1.6;">'+esc(oldContent)+'</textarea><div style="margin-top:0.5rem;display:flex;gap:0.5rem;"><button onclick="savePost('+id+')" class="btn" style="font-size:0.8rem;padding:0.4rem 1rem;">Save</button><button onclick="viewPost('+id+')" style="background:transparent;color:var(--text-secondary);border:1px solid var(--border);padding:0.4rem 1rem;border-radius:6px;font-size:0.8rem;cursor:pointer;font-family:Outfit,sans-serif;">Cancel</button></div>';
+}
+
+async function savePost(id){
+  var t=document.getElementById('edit-title-'+id).value.trim();
+  var c=document.getElementById('edit-content-'+id).value.trim();
+  if(!t||!c)return;
+  try{await fetch(SB+'/posts?id=eq.'+id,{method:'PATCH',headers:{...gh(),'Prefer':'return=minimal'},body:JSON.stringify({title:t,content:c})});viewPost(id);loadPosts();}catch(e){}
+}
+
+async function editComment(cid,pid){
+  var el=document.getElementById('comment-text-'+cid);
+  var old=el.textContent;
+  el.innerHTML='<textarea id="edit-comment-'+cid+'" style="width:100%;min-height:60px;background:var(--bg-card);color:var(--text-primary);border:1px solid var(--border-amber);padding:0.5rem;border-radius:6px;font-family:Outfit,sans-serif;font-size:0.9rem;">'+esc(old)+'</textarea><div style="margin-top:0.5rem;display:flex;gap:0.5rem;"><button onclick="saveComment('+cid+','+pid+')" class="btn" style="font-size:0.75rem;padding:0.3rem 0.8rem;">Save</button><button onclick="viewPost('+pid+')" style="background:transparent;color:var(--text-secondary);border:1px solid var(--border);padding:0.3rem 0.8rem;border-radius:6px;font-size:0.75rem;cursor:pointer;font-family:Outfit,sans-serif;">Cancel</button></div>';
+}
+
+async function saveComment(cid,pid){
+  var c=document.getElementById('edit-comment-'+cid).value.trim();
+  if(!c)return;
+  try{await fetch(SB+'/comments?id=eq.'+cid,{method:'PATCH',headers:{...gh(),'Prefer':'return=minimal'},body:JSON.stringify({content:c})});viewPost(pid);}catch(e){}
+}
+
+async function viewProfile(userId){
+  document.getElementById('postList').classList.add('hide');document.querySelector('.cats').style.display='none';
+  var det=document.getElementById('postDetail');det.classList.add('show');det.innerHTML='<div class="empty">Loading profile...</div>';
+  try{
+    var pr=await fetch(SB+'/profiles?id=eq.'+userId+'&select=*',{headers:H});var prs=await pr.json();var profile=prs[0];
+    if(!profile){det.innerHTML='<span class="back-btn" onclick="backToList()">&#8592; Back to forum</span><div class="empty">Profile not found</div>';return;}
+    var badge=roleBadge(profile);
+    var isMe=currentUser&&currentUser.id===userId;
+    var postsR=await fetch(SB+'/posts?author_id=eq.'+userId+'&select=*&order=created_at.desc',{headers:H});var posts=await postsR.json();
+    var commentsR=await fetch(SB+'/comments?author_id=eq.'+userId+'&select=*,posts(title)&order=created_at.desc&limit=20',{headers:H});var comments=await commentsR.json();
+    var cl={general:'General Chat',updates:'Updates',complaints:'Complaints',support:'Support'};
+    var postsHtml=posts.length>0?posts.map(function(p){
+      var dt=new Date(p.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+      return '<div class="post-card" onclick="viewPost('+p.id+')" style="cursor:pointer;"><div class="post-meta"><span class="post-cat">'+(cl[p.category]||p.category)+'</span><span class="post-date">'+dt+'</span></div><div class="post-title">'+esc(p.title)+'</div></div>';
+    }).join(''):'<div style="color:var(--text-dim);font-size:0.9rem;">No posts yet</div>';
+    var commentsHtml=comments.length>0?comments.map(function(c){
+      var cd=new Date(c.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+      var postTitle=c.posts?c.posts.title:'Unknown post';
+      return '<div style="padding:0.8rem 0;border-bottom:1px solid var(--border);"><div style="font-size:0.8rem;color:var(--text-dim);">'+cd+' on "'+esc(postTitle)+'"</div><div style="font-size:0.9rem;margin-top:0.3rem;">'+esc(c.content.length>100?c.content.substring(0,100)+'...':c.content)+'</div></div>';
+    }).join(''):'<div style="color:var(--text-dim);font-size:0.9rem;">No comments yet</div>';
+    var joined=profile.created_at?new Date(profile.created_at).toLocaleDateString('en-US',{month:'long',year:'numeric'}):'Unknown';
+    var avatarBig=profile.avatar_url?'<img src="'+profile.avatar_url+'" style="width:64px;height:64px;border-radius:50%;object-fit:cover;">':'<div style="width:64px;height:64px;border-radius:50%;background:var(--amber-glow);display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:700;color:var(--amber);">'+esc(profile.username.charAt(0).toUpperCase())+'</div>';
+    var uploadBtn=isMe?'<div style="margin-top:0.5rem;"><label style="cursor:pointer;color:var(--amber);font-size:0.8rem;font-weight:600;">Change avatar <input type="file" accept="image/jpeg,image/png,image/webp" onchange="uploadAvatar(this)" style="display:none;"></label></div>':'';
+    det.innerHTML='<span class="back-btn" onclick="backToList()">&#8592; Back to forum</span><div style="margin-top:1.5rem;"><div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.5rem;"><div id="profileAvatar">'+avatarBig+'</div><div><div style="font-size:1.2rem;font-weight:700;">@'+esc(profile.username)+badge+'</div><div style="font-size:0.8rem;color:var(--text-dim);">Joined '+joined+'</div>'+uploadBtn+'</div></div></div><h3 style="font-size:1.05rem;font-weight:600;margin:1.5rem 0 1rem;">Posts ('+posts.length+')</h3>'+postsHtml+'<h3 style="font-size:1.05rem;font-weight:600;margin:1.5rem 0 1rem;">Recent Comments</h3>'+commentsHtml;
+  }catch(e){det.innerHTML='<span class="back-btn" onclick="backToList()">&#8592; Back to forum</span><div class="empty">Failed to load profile</div>';}
+}
+
+async function uploadAvatar(input){
+  if(!input.files||!input.files[0]||!currentUser)return;
+  var file=input.files[0];
+  if(file.size>2*1024*1024){alert('Image must be under 2MB');return;}
+  var ext=file.name.split('.').pop().toLowerCase();
+  if(['jpg','jpeg','png','webp'].indexOf(ext)===-1){alert('Only JPG, PNG, or WebP allowed');return;}
+  var path=currentUser.id+'_'+Date.now()+'.'+ext;
+  try{
+    var uploadH={'apikey':KEY,'Authorization':'Bearer '+authToken};
+    var r=await fetch(SB_STORAGE+'/object/avatars/'+path,{method:'POST',headers:uploadH,body:file});
+    if(!r.ok){alert('Upload failed');return;}
+    var url=SB_STORAGE+'/object/public/avatars/'+path;
+    await fetch(SB+'/profiles?id=eq.'+currentUser.id,{method:'PATCH',headers:{...gh(),'Prefer':'return=minimal'},body:JSON.stringify({avatar_url:url})});
+    currentUser.avatar_url=url;
+    localStorage.setItem('forum_user',JSON.stringify(currentUser));
+    document.getElementById('profileAvatar').innerHTML='<img src="'+url+'" style="width:64px;height:64px;border-radius:50%;object-fit:cover;">';
+    loadPosts();
+  }catch(e){alert('Upload failed');}
+}
 
 var lastPostTime=0;
 var origSubmitPost=submitPost;
