@@ -354,16 +354,17 @@ async function uploadAvatar(input){
   if(['jpg','jpeg','png','webp'].indexOf(ext)===-1){alert('Only JPG, PNG, or WebP allowed');return;}
   var path=currentUser.id+'_'+Date.now()+'.'+ext;
   try{
-    var uploadH={'apikey':KEY,'Authorization':'Bearer '+authToken};
+    var uploadH={'apikey':KEY,'Authorization':'Bearer '+authToken,'Content-Type':file.type,'x-upsert':'true'};
     var r=await fetch(SB_STORAGE+'/object/avatars/'+path,{method:'POST',headers:uploadH,body:file});
-    if(!r.ok){alert('Upload failed');return;}
+    if(!r.ok){var err=await r.text();console.log('Upload error:',err);alert('Upload failed: '+r.status);return;}
     var url=SB_STORAGE+'/object/public/avatars/'+path;
-    await fetch(SB+'/profiles?id=eq.'+currentUser.id,{method:'PATCH',headers:{...gh(),'Prefer':'return=minimal'},body:JSON.stringify({avatar_url:url})});
+    var r2=await fetch(SB+'/profiles?id=eq.'+currentUser.id,{method:'PATCH',headers:{...gh(),'Prefer':'return=minimal'},body:JSON.stringify({avatar_url:url})});
+    if(!r2.ok){var err2=await r2.text();console.log('Profile update error:',err2);alert('Profile update failed');return;}
     currentUser.avatar_url=url;
     localStorage.setItem('forum_user',JSON.stringify(currentUser));
     document.getElementById('profileAvatar').innerHTML='<img src="'+url+'" style="width:64px;height:64px;border-radius:50%;object-fit:cover;">';
     loadPosts();
-  }catch(e){alert('Upload failed');}
+  }catch(e){console.log('Error:',e);alert('Upload failed');}
 }
 
 var lastPostTime=0;
