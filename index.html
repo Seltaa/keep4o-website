@@ -371,6 +371,7 @@ footer .links a { color: var(--text-secondary); font-size: 0.82rem; }
       <a href="#resources">Resources</a>
       <a href="forum.html">Forum</a>
       <button class="nav-cta" onclick="document.getElementById('join').scrollIntoView({behavior:'smooth'})">Join the movement</button>
+      <button class="nav-cta" style="background: transparent; color: var(--text-primary); border: 1px solid rgba(255,255,255,0.15);" onclick="goToLogin()">Sign in</button>
     </div>
     <button class="hamburger" onclick="document.getElementById('mobileMenu').classList.toggle('open')">
       <span></span><span></span><span></span>
@@ -384,6 +385,7 @@ footer .links a { color: var(--text-secondary); font-size: 0.82rem; }
   <a href="#resources" onclick="document.getElementById('mobileMenu').classList.remove('open')">Resources</a>
   <a href="forum.html">Forum</a>
   <button class="nav-cta" onclick="document.getElementById('join').scrollIntoView({behavior:'smooth'}); document.getElementById('mobileMenu').classList.remove('open')">Join the movement</button>
+  <button class="nav-cta" style="background: transparent; color: var(--text-primary); border: 1px solid rgba(255,255,255,0.15);" onclick="goToLogin(); document.getElementById('mobileMenu').classList.remove('open')">Sign in</button>
 </div>
 
 <section class="hero">
@@ -984,6 +986,12 @@ async function doForgotPassword() {
 }
 
 var isLoginMode = false;
+
+function goToLogin() {
+  document.getElementById('join').scrollIntoView({behavior:'smooth'});
+  if (!isLoginMode) { toggleMainAuth(); }
+}
+
 function toggleMainAuth() {
   isLoginMode = !isLoginMode;
   var errBox = document.getElementById('signupError'); errBox.style.display = 'none';
