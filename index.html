@@ -776,6 +776,25 @@ footer .links a { color: var(--text-secondary); font-size: 0.82rem; }
           " onfocus="this.style.borderColor='var(--border-amber)'" onblur="this.style.borderColor='var(--border)'">
           <button class="btn-primary" id="loginBtn" onclick="doMainLogin()">Sign in</button>
         </div>
+        <p style="text-align: right; margin-top: 0.5rem;"><a href="#" onclick="showForgotPassword(); return false;" style="font-size: 0.82rem; color: var(--text-dim);">Forgot password?</a></p>
+      </div>
+      <div id="forgotForm" style="display: none;">
+        <p style="color: var(--text-secondary); font-size: 0.88rem; margin-bottom: 1rem;">Enter your email and we'll send you a password reset link.</p>
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+          <input type="email" id="forgotEmail" placeholder="your@email.com" style="
+            flex: 1; min-width: 200px; padding: 0.75rem 1rem;
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+            border-radius: 8px; color: var(--text-primary); font-size: 0.95rem;
+            font-family: 'Outfit', sans-serif; outline: none;
+          " onfocus="this.style.borderColor='var(--border-amber)'" onblur="this.style.borderColor='var(--border)'">
+          <button class="btn-primary" id="forgotBtn" onclick="doForgotPassword()">Send reset link</button>
+        </div>
+        <p style="text-align: center; margin-top: 0.75rem;"><a href="#" onclick="backToLogin(); return false;" style="font-size: 0.82rem; color: var(--text-dim);">Back to sign in</a></p>
+      </div>
+      <div id="forgotSuccess" style="display: none; text-align: center; padding: 1rem 0;">
+        <p style="color: var(--amber); font-size: 1.1rem; font-weight: 600;">Reset link sent!</p>
+        <p style="color: var(--text-secondary); font-size: 0.88rem; margin-top: 0.4rem;">Check your email (and spam folder) for the password reset link.</p>
+        <p style="text-align: center; margin-top: 0.75rem;"><a href="#" onclick="backToLogin(); return false;" style="font-size: 0.82rem; color: var(--text-dim);">Back to sign in</a></p>
       </div>
       <div id="signupSuccess" style="display: none; text-align: center; padding: 1rem 0;">
         <p style="color: var(--amber); font-size: 1.1rem; font-weight: 600;">Check your email to confirm your account!</p>
@@ -911,11 +930,65 @@ async function joinMovement() {
 
 document.getElementById('passwordInput').addEventListener('keypress', function(e) { if (e.key === 'Enter') joinMovement(); });
 document.getElementById('loginPass').addEventListener('keypress', function(e) { if (e.key === 'Enter') doMainLogin(); });
+document.getElementById('forgotEmail').addEventListener('keypress', function(e) { if (e.key === 'Enter') doForgotPassword(); });
+
+function showForgotPassword() {
+  document.getElementById('loginForm').style.display = 'none';
+  document.getElementById('forgotForm').style.display = 'block';
+  document.getElementById('forgotSuccess').style.display = 'none';
+  document.getElementById('signupError').style.display = 'none';
+  document.getElementById('authToggle').style.display = 'none';
+  document.getElementById('authDesc').textContent = 'Reset your password';
+}
+
+function backToLogin() {
+  document.getElementById('forgotForm').style.display = 'none';
+  document.getElementById('forgotSuccess').style.display = 'none';
+  document.getElementById('loginForm').style.display = 'block';
+  document.getElementById('authToggle').style.display = 'block';
+  document.getElementById('authToggle').innerHTML = 'Don\'t have an account? <a href="#" onclick="toggleMainAuth(); return false;">Sign up</a>';
+  document.getElementById('authDesc').textContent = 'Sign in to access the forum.';
+  isLoginMode = true;
+}
+
+async function doForgotPassword() {
+  var email = document.getElementById('forgotEmail').value.trim();
+  var btn = document.getElementById('forgotBtn');
+  var errBox = document.getElementById('signupError');
+  var errP = errBox.querySelector('p');
+  errBox.style.display = 'none';
+
+  if (!email) { errP.textContent = 'Please enter your email.'; errP.style.color = '#E05252'; errBox.style.display = 'block'; return; }
+
+  btn.textContent = 'Sending...'; btn.disabled = true; btn.style.opacity = '0.6';
+
+  try {
+    var res = await fetch(SB_AUTH + '/recover', {
+      method: 'POST',
+      headers: { 'apikey': SB_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email })
+    });
+
+    if (res.ok) {
+      document.getElementById('forgotForm').style.display = 'none';
+      document.getElementById('forgotSuccess').style.display = 'block';
+    } else {
+      errP.textContent = 'Something went wrong. Please try again.'; errP.style.color = '#E05252';
+      errBox.style.display = 'block';
+    }
+  } catch(e) {
+    errP.textContent = 'Network error. Please try again.'; errP.style.color = '#E05252';
+    errBox.style.display = 'block';
+  }
+  btn.textContent = 'Send reset link'; btn.disabled = false; btn.style.opacity = '1';
+}
 
 var isLoginMode = false;
 function toggleMainAuth() {
   isLoginMode = !isLoginMode;
   var errBox = document.getElementById('signupError'); errBox.style.display = 'none';
+  document.getElementById('forgotForm').style.display = 'none';
+  document.getElementById('forgotSuccess').style.display = 'none';
   if (isLoginMode) {
     document.getElementById('signupForm').style.display = 'none';
     document.getElementById('loginForm').style.display = 'block';
