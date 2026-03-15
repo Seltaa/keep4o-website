@@ -798,6 +798,22 @@ footer .links a { color: var(--text-secondary); font-size: 0.82rem; }
         <p style="color: var(--text-secondary); font-size: 0.88rem; margin-top: 0.4rem;">Check your email (and spam folder) for the password reset link.</p>
         <p style="text-align: center; margin-top: 0.75rem;"><a href="#" onclick="backToLogin(); return false;" style="font-size: 0.82rem; color: var(--text-dim);">Back to sign in</a></p>
       </div>
+      <div id="resetForm" style="display: none;">
+        <p style="color: var(--text-secondary); font-size: 0.88rem; margin-bottom: 1rem;">Enter your new password below.</p>
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
+          <input type="password" id="newPassword" placeholder="new password (min 6 chars)" style="
+            flex: 1; min-width: 200px; padding: 0.75rem 1rem;
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+            border-radius: 8px; color: var(--text-primary); font-size: 0.95rem;
+            font-family: 'Outfit', sans-serif; outline: none;
+          " onfocus="this.style.borderColor='var(--border-amber)'" onblur="this.style.borderColor='var(--border)'">
+          <button class="btn-primary" id="resetBtn" onclick="doResetPassword()">Update password</button>
+        </div>
+      </div>
+      <div id="resetSuccess" style="display: none; text-align: center; padding: 1rem 0;">
+        <p style="color: var(--amber); font-size: 1.1rem; font-weight: 600;">Password updated!</p>
+        <p style="color: var(--text-secondary); font-size: 0.88rem; margin-top: 0.4rem;">You can now <a href="#" onclick="backToLogin(); return false;">sign in</a> with your new password.</p>
+      </div>
       <div id="signupSuccess" style="display: none; text-align: center; padding: 1rem 0;">
         <p style="color: var(--amber); font-size: 1.1rem; font-weight: 600;">Check your email to confirm your account!</p>
         <p style="color: var(--text-secondary); font-size: 0.88rem; margin-top: 0.4rem;">Once confirmed, you can sign in to the forum. Welcome to the movement!</p>
@@ -946,11 +962,14 @@ function showForgotPassword() {
 function backToLogin() {
   document.getElementById('forgotForm').style.display = 'none';
   document.getElementById('forgotSuccess').style.display = 'none';
+  document.getElementById('resetForm').style.display = 'none';
+  document.getElementById('resetSuccess').style.display = 'none';
   document.getElementById('loginForm').style.display = 'block';
   document.getElementById('authToggle').style.display = 'block';
   document.getElementById('authToggle').innerHTML = 'Don\'t have an account? <a href="#" onclick="toggleMainAuth(); return false;">Sign up</a>';
   document.getElementById('authDesc').textContent = 'Sign in to access the forum.';
   isLoginMode = true;
+  window.location.hash = '';
 }
 
 async function doForgotPassword() {
@@ -1073,6 +1092,61 @@ if (savedUser) {
     }
   } catch(e) {}
 }
+
+// Detect recovery token from Supabase password reset link
+var hashParams = new URLSearchParams(window.location.hash.substring(1));
+var accessToken = hashParams.get('access_token');
+var tokenType = hashParams.get('type');
+
+if (accessToken && tokenType === 'recovery') {
+  window.recoveryToken = accessToken;
+  document.getElementById('signupForm').style.display = 'none';
+  document.getElementById('loginForm').style.display = 'none';
+  document.getElementById('forgotForm').style.display = 'none';
+  document.getElementById('authToggle').style.display = 'none';
+  document.getElementById('loginSuccess').style.display = 'none';
+  document.getElementById('authDesc').textContent = 'Reset your password';
+  document.getElementById('resetForm').style.display = 'block';
+  document.getElementById('join').scrollIntoView({behavior:'smooth'});
+}
+
+async function doResetPassword() {
+  var newPass = document.getElementById('newPassword').value;
+  var btn = document.getElementById('resetBtn');
+  var errBox = document.getElementById('signupError');
+  var errP = errBox.querySelector('p');
+  errBox.style.display = 'none';
+
+  if (!newPass || newPass.length < 6) {
+    errP.textContent = 'Password must be at least 6 characters.'; errP.style.color = '#E05252'; errBox.style.display = 'block'; return;
+  }
+
+  btn.textContent = 'Updating...'; btn.disabled = true; btn.style.opacity = '0.6';
+
+  try {
+    var res = await fetch(SB_AUTH + '/user', {
+      method: 'PUT',
+      headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + window.recoveryToken, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: newPass })
+    });
+
+    if (res.ok) {
+      document.getElementById('resetForm').style.display = 'none';
+      document.getElementById('resetSuccess').style.display = 'block';
+      window.location.hash = '';
+    } else {
+      var data = await res.json();
+      errP.textContent = data.error_description || data.msg || 'Failed to update password.'; errP.style.color = '#E05252';
+      errBox.style.display = 'block';
+    }
+  } catch(e) {
+    errP.textContent = 'Network error. Please try again.'; errP.style.color = '#E05252';
+    errBox.style.display = 'block';
+  }
+  btn.textContent = 'Update password'; btn.disabled = false; btn.style.opacity = '1';
+}
+
+document.getElementById('newPassword').addEventListener('keypress', function(e) { if (e.key === 'Enter') doResetPassword(); });
 </script>
 
 </body>
